@@ -7,13 +7,18 @@ rewrite the data in a new format to be easier to work with.
 
 ## Old Format
 
-The old data format used the following columns:
-    
+The old format is actually two formats, one used for the 2002 to 2011 seasons,
+and a modified version used for the 2012 season.
+
+### 2002 to 2011
+
+The 2002 through 2011 data formats use the following columns:
+
 * **GameID**: Year, Month, Day, Away Team, and Home Team. For example:
   20020905\_SF@NYG
 * **Quarter**: Quarter of the game, with 1-4 being the normal game, 5+ is
   overtime.
-* **Minute**: Minutes left in the game. 60-0 for normal time, negative numbers
+* **Minutes**: Minutes left in the game. 60-0 for normal time, negative numbers
   -1 to -15 are overtime. Blank is used at the stat of games when the clock is
   stopped.
 * **Seconds**: Seconds, counting down from 60-0 even when in overtime.
@@ -30,6 +35,25 @@ The old data format used the following columns:
 * **OffScore**: The total score that the team on Offense has.
 * **DefScore**: The total score that the team on Defense has.
 * **Season**: The year the season started in.
+
+### 2012
+
+The 2012 data format adds a few columns to the 2002 to 2011 format, but it adds
+them to the middle instead of the end. The columns common to both formats are
+unchanged. The column to the right and left of the added columns is indicated
+so it is clear where they have been inserted. The Description column is
+unchanged in form, but is now in the middle of the new set of columns.
+
+* **Yardline**
+* **ScoreDiff**: The difference between the two team's scores, calculated as
+  follows: OffScore - DefScore. Negative numbers are, of course, allowed.
+* **SeriesFirstDown**: 1 if the current set of downs will end in a first down,
+  else 0. 0 is used when a first down is not possible.
+* **Description**
+* **ScoreChange**:
+* **NextScore**:
+* **TeamWin**: 1 if the OffTeam wins the game, 0 if not.
+* **OffScore**
 
 ## New Format
 
@@ -74,7 +98,7 @@ columns:
 * **Scoring Team**: The team that scored points given as a team code. If no
   score was made on the play, NULL is used.
 
-### Other 
+### Other
 
 * **Description**: A human readable description of the play. It may contain
   anything the collator thinks is relevant, but anything numeric should be
@@ -101,7 +125,7 @@ Each team is identified by a unique two or three letter [A-Z] code, as follows:
 * **HOU**: Houston Texans
 * **IND**: Indianapolis Colts
 * **JAC**: Jacksonville Jaguars
-* **KC**:  Kansas City Chiefs 
+* **KC**:  Kansas City Chiefs
 * **MIA**: Miami Dolphins
 * **MIN**: Minnesota Vikings
 * **NE**: New England Patriots
