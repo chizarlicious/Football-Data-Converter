@@ -36,25 +36,6 @@ The 2002 through 2011 data formats use the following columns:
 * **DefScore**: The total score that the team on Defense has.
 * **Season**: The year the season started in.
 
-### 2012
-
-The 2012 data format adds a few columns to the 2002 to 2011 format, but it adds
-them to the middle instead of the end. The columns common to both formats are
-unchanged. The column to the right and left of the added columns is indicated
-so it is clear where they have been inserted. The Description column is
-unchanged in form, but is now in the middle of the new set of columns.
-
-* **Yardline**
-* **ScoreDiff**: The difference between the two team's scores, calculated as
-  follows: OffScore - DefScore. Negative numbers are, of course, allowed.
-* **SeriesFirstDown**: 1 if the current set of downs will end in a first down,
-  else 0. 0 is used when a first down is not possible.
-* **Description**
-* **ScoreChange**:
-* **NextScore**:
-* **TeamWin**: 1 if the OffTeam wins the game, 0 if not.
-* **OffScore**
-
 ## New Format
 
 **Version**: 0.1
