@@ -3,14 +3,19 @@
 This is a set of play-by-play data from the National Football League, as well
 as scripts to check it for consistency, edit it, and parse it.
 
-The data were compiled by Brian Burke and made available on
-[his website](http://www.advancednflstats.com/2010/04/play-by-play-data.html).
+The data were compiled by [Brian Burke](http://www.advancednflstats.com/2008/02/about-author.html)
+and made available on [his website](http://www.advancednflstats.com/2010/04/play-by-play-data.html).
 
 ## Licenses
 
+### Code
+
+The code (all the python files) are licensed under the GPLv3. For the full text
+of the license, please see the LICENSE.md file in the root of this repository.
+
 ### Original Data
 
-Burke provides the following text as a license:
+Burke provided the following text as a license for the original data:
 
 > [Monday, January 07, 2013](http://www.advancednflstats.com/2010/04/play-by-play-data.html?showComment=1357609494867#c7108589146909838552)
 > 
