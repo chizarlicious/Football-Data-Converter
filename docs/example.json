@@ -1,0 +1,26 @@
+[
+    { 
+        "season" : 2012,
+        "games" : [
+        { 
+            "home team" : "NYG",
+            "away team" : "DAL",
+            "date" : "2012-09-05",
+            "plays" : [
+            { 
+                "time" : 0,
+                "home team score" : 0,
+                "away team score" : 0,
+                "offense": "DAL",
+                "down" : null,
+                "to go" : null,
+                "yards to goal" : null,
+                "score type" : null,
+                "scoring team" : null,
+                "_description_" : "D.Bailey kicks 69 yards from DAL 35 to NYG -4. D.Wilson to NYG 16 for 20 yards (A.Holmes)."
+            }
+            ]
+        }
+        ]
+    }
+]
