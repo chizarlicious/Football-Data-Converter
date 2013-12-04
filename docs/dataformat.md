@@ -1,41 +1,5 @@
 # Data Format Design Document
 
-The current CSV data is lacking in many regards, most notably important
-information about the game is contained in a human readable summary, but not
-in machine readable columns. We therefore are going to parse, correct, and
-rewrite the data in a new format to be easier to work with.
-
-## Old Format
-
-The old format is actually two formats, one used for the 2002 to 2011 seasons,
-and a modified version used for the 2012 season.
-
-### 2002 to 2011
-
-The 2002 through 2011 data formats use the following columns:
-
-* **GameID**: Year, Month, Day, Away Team, and Home Team. For example:
-  20020905\_SF@NYG
-* **Quarter**: Quarter of the game, with 1-4 being the normal game, 5+ is
-  overtime.
-* **Minutes**: Minutes left in the game. 60-0 for normal time, negative numbers
-  -1 to -15 are overtime. Blank is used at the stat of games when the clock is
-  stopped.
-* **Seconds**: Seconds, counting down from 60-0 even when in overtime.
-* **Offense**: The team that starts with possession, including the kicking team
-  when punting or setting up a kickoff.
-* **Defense**: The team that is not the offense, as defined above.
-* **Down**: 1-4, although some are left blank if a down doesn't make sense (for
-  example on a kickoff).
-* **ToGo**: Yards to first down, left blank if a first down doesn't make sense.
-* **Yardline**: Yards from the goal line for the Offensive team, 100-0.
-* **Description**: A human readable description of the play. Unfortunately it
-  contains keywords that tell you about the play, for example "TOUCHDOWN" or
-  "FUMBLE".
-* **OffScore**: The total score that the team on Offense has.
-* **DefScore**: The total score that the team on Defense has.
-* **Season**: The year the season started in.
-
 ## New Format
 
 **Version**: 0.1
