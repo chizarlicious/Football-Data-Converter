@@ -152,3 +152,6 @@ nosetests.xml
 *.vrb
 *.xdy
 *.tdo
+
+## Ignore directories
+raw/
