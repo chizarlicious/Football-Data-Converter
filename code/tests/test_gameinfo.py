@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import unittest
-from  import verify_times
 from parse_raw_data.parse_gameinfo import convert_time, convert_weather
 
 
