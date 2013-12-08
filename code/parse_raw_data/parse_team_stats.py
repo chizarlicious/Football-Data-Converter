@@ -11,6 +11,17 @@ def convert_rush_info(rush_string):
         A dictionary of the form:  {"plays": 16, "yards": 34, "touchdowns": 0}.
         Failure returns None.
     """
+    rush_split = rush_string.split('-')
+    # Try to convert all to ints
+    try:
+        plays = int(rush_split[0])
+        yards = int(rush_split[1])
+        touchdowns = int(rush_split[2])
+    except ValueError:  # Not an int!
+        return None
+    else:
+        return {"plays": plays, "yards": yards, "touchdowns": touchdowns}
+
 
 def convert_pass_info(pass_string):
     """Takes a string of passing statistics and returns a dictionary.
