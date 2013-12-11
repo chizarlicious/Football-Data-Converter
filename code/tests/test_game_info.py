@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from parse_raw_data.parse_game_info import convert_time, convert_weather
+from raw_data_parsers.parse_game_info import convert_time, convert_weather
 
 
 class TestGameInfo(unittest.TestCase):
