@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from parse_raw_data.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
+from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
 
 class TestTeamStats(unittest.TestCase):
