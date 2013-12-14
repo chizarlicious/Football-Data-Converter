@@ -17,7 +17,7 @@ class TestTeamStats(unittest.TestCase):
     def test_convert_pass_info(self):
         # Successful
         self.assertEqual(convert_pass_info("18-34-331-3-0"),
-                {"plays": 18, "yards": 331, "touchdowns": 3,
+                {"plays": 34, "yards": 331, "touchdowns": 3,
                 "interceptions": 0, "successful": 18})
         # Failure returns None
         self.assertEqual(convert_pass_info("18 34-331-3-0"), None)

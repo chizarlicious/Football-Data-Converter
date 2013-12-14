@@ -35,6 +35,20 @@ def convert_pass_info(pass_string):
                 "interceptions": 0, "successful": 18}
             Failure returns None.
     """
+    pass_split = pass_string.split('-')
+    # Try to convert all to ints
+    try:
+        successful = int(pass_split[0])
+        plays = int(pass_split[1])
+        yards = int(pass_split[2])
+        touchdowns = int(pass_split[3])
+        interceptions = int(pass_split[4])
+    except ValueError:  # Not an int!
+        return None
+    else:
+        return {"plays": plays, "yards": yards, "touchdowns": touchdowns,
+                "interceptions": interceptions, "successful": successful}
+
 
 def convert_sack_info(sack_string):
     """Takes a string of sack statistics and returns a dictionary.
@@ -46,6 +60,15 @@ def convert_sack_info(sack_string):
         A dictionary of the form: {"plays": 1, "yards": -7}
             Failure returns None.
     """
+    sack_split = sack_string.split('-')
+    # Try to convert all to ints
+    try:
+        plays = int(sack_split[0])
+        yards = -int(sack_split[1])
+    except ValueError:  # Not an int!
+        return None
+    else:
+        return {"plays": plays, "yards": yards}
 
 def convert_fumble_info(fumble_string):
     """Takes a string of fumble statistics and returns a dictionary.
@@ -57,6 +80,15 @@ def convert_fumble_info(fumble_string):
         A dictionary of the form: {"plays": 2, "lost": 1}
             Failure returns None.
     """
+    fumble_split = fumble_string.split('-')
+    # Try to convert all to ints
+    try:
+        plays = int(fumble_split[0])
+        lost = int(fumble_split[1])
+    except ValueError:  # Not an int!
+        return None
+    else:
+        return {"plays": plays, "lost": lost}
 
 def convert_penalty_info(penalty_string):
     """Takes a string of penalty statistics and returns a dictionary.
@@ -68,3 +100,12 @@ def convert_penalty_info(penalty_string):
         A dictionary of the form: {"plays": 2, "yards": -15}
             Failure returns None.
     """
+    penalty_split = penalty_string.split('-')
+    # Try to convert all to ints
+    try:
+        plays = int(penalty_split[0])
+        yards = -int(penalty_split[1])
+    except ValueError:  # Not an int!
+        return None
+    else:
+        return {"plays": plays, "yards": yards}
