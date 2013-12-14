@@ -10,9 +10,10 @@ class TestGameInfo(unittest.TestCase):
         # Successful
         self.assertEqual(convert_time("09:32am"), "09:32")
         self.assertEqual(convert_time("1:59pm"), "13:59")
-        # Failure returns None
-        self.assertEqual(convert_time("The time is one o'clock."), None)
-        self.assertEqual(convert_time("1:61pm"), None)
+        # Failure raies a ValueError
+        self.assertRaises(ValueError, convert_time, "The time is one o'clock.")
+        self.assertRaises(ValueError, convert_time, "13:40pm")
+        self.assertRaises(ValueError, convert_time, "11:65pm")
 
     def test_convert_weather(self):
         # Successful
@@ -32,9 +33,9 @@ class TestGameInfo(unittest.TestCase):
                 convert_weather("28 degrees, wind 1 mph"),
                 {"temperature": 28, "relative humidity": None, "wind speed": 1, "wind chill": None}
                 )
-        # Failure returns None
-        self.assertEqual(
-                convert_weather("I have no idea what degree to get!"), None)
+        # Failure returns dictionary full of None
+        self.assertEqual(convert_weather("I have no idea what degree to get!"), None)
+        self.assertRaises(ValueError, convert_weather, "twenty-eight degrees, wind five mph")
 
 if __name__ == '__main__':
     unittest.main()
