@@ -12,6 +12,9 @@ class Converter:
         args:
             file_name: A string containing the name of a file to open
         """
+        # Initialize the dictionary to convert to JSON
+        self.__init_json_dict()
+
         # Set up Strainers
         self.__set_strainers()
 
@@ -25,6 +28,23 @@ class Converter:
         for key, value in self.strainers.items():
             self.soups[key] = BeautifulSoup(cont, parse_only=value)
 
+        # Parse the various tables
+        self.__parse_officials()
+
+    def __init_json_dict(self):
+        """ Initialize the dictionary for the output JSON. """
+        self.json_dict = {
+                "home team": None,
+                "away team": None,
+                "venue": None,
+                "datetime": None,
+                "weather": None,
+                "betting": None,
+                "officials": None,
+                "team stats": None,
+                "plays": []
+                }
+
     def __set_strainers(self):
         """ Set up a list of hard coded SoupStrainers. """
         self.strainers = {}
@@ -35,11 +55,42 @@ class Converter:
         # Starters needs work; there is no easy tag to grab
         #self.strainers["starters"] = SoupStrainer(name="starters")
 
+    def __parse_officials(self):
+        """ Set up the officials dictionary and add it to self.json_dict """
+        ref_dict = {}
+        soup = self.soups["ref_info"]
+        # Find each row of the table
+        rows = soup.find_all("tr")
+        for row in rows:
+            # Find each column of the table
+            cols = row.find_all("td")
+            if cols:  # This if removes the header
+                # Extract the position and name of the referee
+                tmp_pos = cols[0].get_text(strip=True)
+                tmp_name = cols[1].get_text(strip=True)
+                # Lowercase the position, and remove newlines in the name
+                pos = tmp_pos.lower()
+                name = tmp_name.replace('\n', ' ')
+                # Insert into our dictionary
+                ref_dict[pos] = name
+
+        # Insert the finished dictionary into the json_dict
+        self.json_dict["officials"] = ref_dict
+
     def print_soups(self):
         """ Print out all the soups. """
         for key in self.soups:
             print("=====", key, "=====")
             print(self.soups[key].prettify())
+
+    def __repr__(self):
+        """ Method that returns a representation of the contents. """
+        return self.json_dict.__repr__()
+
+    def __str__(self):
+        """ Method that returns a string of the contents for printing. """
+        return self.json_dict.__str__()
+
 
 if __name__ == '__main__':
     # We only need to parse commandline flags if running as the main script
@@ -52,4 +103,4 @@ if __name__ == '__main__':
 
     for raw_file in args.file:
         converter = Converter(raw_file)
-        converter.print_soups()
+        print(converter)
