@@ -1,4 +1,10 @@
-# Initial development of parsers under python 3.2 using BeautifulSoup 4,
-# available via package manager (apt-get install python-bs4).
-# Might have to move code to python3 lib directory after install
-# and convert to python 3 format (2to3-3.2 -w bs4).
+# HTML2JSON
+
+## Required Libraries
+
+This code uses Python 3.2 and BeautifulSoup 4.
+
+On Ubuntu you can install these as follows:
+
+    sudo apt-get install python3.2 python3-bs4
+
