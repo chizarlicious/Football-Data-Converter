@@ -77,6 +77,7 @@ names_to_code = {
         "Seattle Seahawks": "SEA",
         "San Francisco 49ers": "SF",
         "Saint Louis Rams": "STL",
+        "St. Louis Rams": "STL",
         "Tampa Bay Buccaneers": "TB",
         "Tennessee Titans": "TEN",
         "Washington Redskins": "WAS",
