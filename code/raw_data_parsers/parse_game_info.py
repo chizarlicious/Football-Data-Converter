@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from time import strptime, strftime
+from datetime import datetime
+from data_helpers.team_list import names_to_code
 
 
 def convert_time(time_string):
@@ -18,6 +20,26 @@ def convert_time(time_string):
     # Thankfully the time module handles this case perfectly
     time_object = strptime(time_string, "%I:%M%p")
     return strftime("%H:%M", time_object)
+
+
+def convert_duration(time_string):
+    """Takes in a string of the form 4:11 and returns the number of seconds
+    (15060).
+
+    args:
+        time_string: A string of format type '%H:%M'
+
+    returns:
+        A integer of the number of seconds.
+
+    raises:
+        ValueError if the input format is wrong.
+    """
+    # We use datetimes, a little overkill, but better than trying to parse on
+    # our own. strptime returns hours and minutes from 1900-1-1:0:00, so we
+    # subtract that off to get a timedelta.
+    delta = datetime.strptime(time_string, "%H:%M") - datetime(1900, 1, 1, 0, 0)
+    return delta.seconds
 
 
 def convert_weather(weather_string):
@@ -74,3 +96,55 @@ def convert_weather(weather_string):
             return out_dict
     # All values are None, so return None
     return None
+
+
+def convert_overunder(ou_string):
+    """Takes in a string of the form 44.5 (over) and returns a positive float
+    if over, negative if under.
+
+    args:
+        ou_string: A string of format type "float (over/under)", can also
+            handle "float(over/under)"
+
+    returns:
+        A float, positive if over, negative if under.
+
+    raises:
+        ValueError if the input format is wrong.
+    """
+    # Check for over, under
+    if "over" in ou_string:
+        over = 1
+    elif "under" in ou_string:
+        over = -1
+    else:
+        raise ValueError
+
+    # Convert the float
+    num = float(ou_string.split('(')[0])
+    return over * num
+
+
+def convert_vegas_line(vl_string):
+    """Takes in a string of the form Denver Broncos -9.0 and returns a tuple of
+    the team code and line: ("DEN", -9.0)
+
+    args:
+        vl_string: A string of the format "Full Team Name -float" or "Pick"
+
+    returns:
+        A tuple with the team code and the spread, or None and 0 if "Pick".
+
+    raises:
+        KeyError if the team name is wrong.
+        IndexError if the input is missing the minus sign.
+        ValueError if the number can't be parsed by int().
+    """
+    # Pick is used when
+    if "Pick" in vl_string:
+        return (None, 0.)
+    else:
+        team_name = vl_string.split('-')[0].strip()
+        line = -1 * float(vl_string.split('-')[1].strip())
+        team_code = names_to_code[team_name]
+        return (team_code, line)
