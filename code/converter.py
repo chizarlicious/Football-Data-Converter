@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from bs4 import BeautifulSoup, SoupStrainer
-from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line
+from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 
 
 class Converter:
@@ -89,6 +89,7 @@ class Converter:
         # Set up dictionaries
         venue_dict = {
                 "stadium": None,
+                "dome": None,
                 "surface": None,
                 "attendance": None
                 }
@@ -115,7 +116,8 @@ class Converter:
                 tmp_key = cols[0].get_text(strip=True)
                 tmp_value = cols[1].get_text(strip=True)
                 if tmp_key == "Stadium":
-                    venue_dict["stadium"] = tmp_value
+                    (stad, dome) = convert_stadium(tmp_value)
+                    (venue_dict["stadium"], venue_dict["dome"]) = (stad, dome)
                 elif tmp_key == "Start Time":
                     date_dict["start time"] = convert_time(tmp_value)
                 elif tmp_key == "Surface":
