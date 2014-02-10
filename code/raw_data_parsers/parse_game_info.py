@@ -99,30 +99,33 @@ def convert_weather(weather_string):
 
 
 def convert_overunder(ou_string):
-    """Takes in a string of the form 44.5 (over) and returns a positive float
-    if over, negative if under.
+    """Takes in a string of the form 44.5 (over) and returns a float.
 
     args:
         ou_string: A string of format type "float (over/under)", can also
-            handle "float(over/under)"
+            handle "float(over/under)". The over/under is ignored, it is
+            redundant information about the outcome of the game.
 
     returns:
-        A float, positive if over, negative if under.
+        A positive float.
 
     raises:
         ValueError if the input format is wrong.
     """
-    # Check for over, under
-    if "over" in ou_string:
-        over = 1
-    elif "under" in ou_string:
-        over = -1
+    chars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+']
+    num = ""
+    # We look through the string and pull out the number, but only if it is at
+    # the start
+    for char in ou_string:
+        if char in chars:
+            num += char
+        else:
+            break
+    # If num isn't empty, return, else raise
+    if num:
+        return float(num)
     else:
         raise ValueError
-
-    # Convert the float
-    num = float(ou_string.split('(')[0])
-    return over * num
 
 
 def convert_vegas_line(vl_string):

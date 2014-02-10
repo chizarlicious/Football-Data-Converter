@@ -51,10 +51,10 @@ class TestGameInfo(unittest.TestCase):
         # Successful
         self.assertEqual(convert_overunder("44.5(over)"), 44.5)
         self.assertEqual(convert_overunder("0 (under)"), 0.)
-        self.assertEqual(convert_overunder("32 (under)"), -32.)
+        self.assertEqual(convert_overunder("32 (under)"), 32.)
+        self.assertEqual(convert_overunder("32"), 32.)
         # Failure raises a ValueError
         self.assertRaises(ValueError, convert_overunder, "35 under")
-        self.assertRaises(ValueError, convert_overunder, "-23")
         self.assertRaises(ValueError, convert_overunder, "five (under)")
 
     def test_convert_vegas_line(self):
