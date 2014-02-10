@@ -151,3 +151,31 @@ def convert_vegas_line(vl_string):
         line = -1 * float(vl_string.split('-')[1].strip())
         team_code = names_to_code[team_name]
         return (team_code, line)
+
+
+def convert_stadium(stadium_string):
+    """Takes in a string of the form Metrodome (dome) and returns a tuple of
+    the name and dome status.
+
+    args:
+        stadium_string: A string of the format "Stadium Name (dome)" with
+            "(dome)" optional.
+
+    returns:
+        A tuple with the stadium name, and true/false for the dome.
+
+    raises:
+        ValueError if their is no name given.
+        TypeError if vanue_string is not a string.
+    """
+    if not isinstance(stadium_string, str):
+        raise TypeError
+    # Pick is used when
+    dome = False
+    if "(dome)" in stadium_string:
+        dome = True
+        stadium_string = (stadium_string.replace("(dome)", '')).strip()
+    if stadium_string:
+        return (str(stadium_string), dome)
+    else:
+        raise ValueError

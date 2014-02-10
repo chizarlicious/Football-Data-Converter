@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line
+from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 
 
 class TestGameInfo(unittest.TestCase):
@@ -53,9 +53,10 @@ class TestGameInfo(unittest.TestCase):
         self.assertEqual(convert_overunder("0 (under)"), 0.)
         self.assertEqual(convert_overunder("32 (under)"), 32.)
         self.assertEqual(convert_overunder("32"), 32.)
+        self.assertEqual(convert_overunder("35 under"), 35.)
         # Failure raises a ValueError
-        self.assertRaises(ValueError, convert_overunder, "35 under")
         self.assertRaises(ValueError, convert_overunder, "five (under)")
+        self.assertRaises(ValueError, convert_overunder, "under 70")
 
     def test_convert_vegas_line(self):
         # Successful
@@ -66,6 +67,21 @@ class TestGameInfo(unittest.TestCase):
         self.assertRaises(IndexError, convert_vegas_line, "San Diego Chargers +4.5")
         self.assertRaises(ValueError, convert_vegas_line, "San Diego Chargers -four")
         self.assertRaises(KeyError, convert_vegas_line, "Pallet Town Charizards -10.")
+
+    def test_convert_stadium(self):
+        # Successful
+        self.assertEqual(
+                convert_stadium("Hubert H. Humphrey Metrodome (dome)"),
+                ("Hubert H. Humphrey Metrodome", True)
+                )
+        self.assertEqual(
+                convert_stadium("Candlestick Park"),
+                ("Candlestick Park", False)
+                )
+        # Failure raises various errors
+        self.assertRaises(TypeError, convert_stadium, 123)
+        self.assertRaises(ValueError, convert_stadium, "")
+        self.assertRaises(ValueError, convert_stadium, "(dome)")
 
 if __name__ == '__main__':
     unittest.main()
