@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from bs4 import BeautifulSoup, SoupStrainer
+from copy import deepcopy
 from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 
 
@@ -43,7 +44,7 @@ class Converter:
                 "weather": None,
                 "betting": None,
                 "officials": None,
-                "team stats": None,
+                "team stats": {},
                 "plays": []
                 }
         self.json["venue"] = {
@@ -62,6 +63,37 @@ class Converter:
                 "speard": None,
                 "over under": None
                 }
+        teamstats = {
+                "first downs" : None,
+                "rush" : {
+                    "plays" : None,
+                    "yards" : None,
+                    "touchdowns" : None,
+                    },
+                "pass" : {
+                    "plays": None,
+                    "yards" : None,
+                    "touchdowns" : None,
+                    "successful" : None,
+                    "interceptions" : None
+                    },
+                "sacks" : {
+                    "plays" : None,
+                    "yards" : None
+                    },
+                "fumbles" : {
+                    "plays" : None,
+                    "lost" : None
+                    },
+                "penalties" : {
+                    "plays" : None,
+                    "yards" : None
+                    }
+                }
+        # We use deep copy so that we can uniquely set values in each, instead
+        # of having them linked.
+        self.json["team stats"]["home"] = deepcopy(teamstats)
+        self.json["team stats"]["away"] = deepcopy(teamstats)
 
     def __set_strainers(self):
         """ Set up a list of hard coded SoupStrainers. """
