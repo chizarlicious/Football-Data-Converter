@@ -14,7 +14,7 @@ class Converter:
             file_name: A string containing the name of a file to open
         """
         # Initialize the dictionary to convert to JSON
-        self.__init_json_dict()
+        self.__init_json()
 
         # Set up Strainers
         self.__set_strainers()
@@ -33,9 +33,9 @@ class Converter:
         self.__parse_officials()
         self.__parse_game_info()
 
-    def __init_json_dict(self):
+    def __init_json(self):
         """ Initialize the dictionary for the output JSON. """
-        self.json_dict = {
+        self.json = {
                 "home team": None,
                 "away team": None,
                 "venue": None,
@@ -45,6 +45,22 @@ class Converter:
                 "officials": None,
                 "team stats": None,
                 "plays": []
+                }
+        self.json["venue"] = {
+                "stadium": None,
+                "dome": None,
+                "surface": None,
+                "attendance": None
+                }
+        self.json["datetime"] = {
+                "date": None,
+                "start time": None,
+                "duration": None
+                }
+        self.json["betting"] = {
+                "winner": None,
+                "speard": None,
+                "over under": None
                 }
 
     def __set_strainers(self):
@@ -58,7 +74,7 @@ class Converter:
         #self.strainers["starters"] = SoupStrainer(name="starters")
 
     def __parse_officials(self):
-        """ Set up the officials dictionary and add it to self.json_dict """
+        """ Set up the officials dictionary and add it to self.json """
         ref_dict = {}
         soup = self.soups["ref_info"]
         # Find each row of the table
@@ -76,35 +92,15 @@ class Converter:
                 # Insert into our dictionary
                 ref_dict[pos] = name
 
-        # Insert the finished dictionary into the json_dict
-        self.json_dict["officials"] = ref_dict
+        # Insert the finished dictionary into the json
+        self.json["officials"] = ref_dict
 
     def __parse_team_stats(self):
-        """ Set up the team stats dictionaries and add it to self.json_dict """
-        #TODO: Implement
+        """ Set up the team stats dictionaries and add it to self.json """
         pass
 
     def __parse_game_info(self):
-        """ Set up the game info dictionary and add it to self.json_dict """
-        # Set up dictionaries
-        venue_dict = {
-                "stadium": None,
-                "dome": None,
-                "surface": None,
-                "attendance": None
-                }
-        date_dict = {
-                "date": None,
-                "start time": None,
-                "duration": None
-                }
-        weather_dict = {}
-        betting_dict = {
-                "winner": None,
-                "speard": None,
-                "over under": None
-                }
-
+        """ Set up the game info dictionary and add it to self.json """
         soup = self.soups["game_info"]
         # Find each row of the table
         rows = soup.find_all("tr")
@@ -117,30 +113,25 @@ class Converter:
                 tmp_value = cols[1].get_text(strip=True)
                 if tmp_key == "Stadium":
                     (stad, dome) = convert_stadium(tmp_value)
-                    (venue_dict["stadium"], venue_dict["dome"]) = (stad, dome)
+                    self.json["venue"]["stadium"] = stad
+                    self.json["venue"]["dome"] = dome
                 elif tmp_key == "Start Time":
-                    date_dict["start time"] = convert_time(tmp_value)
+                    self.json["datetime"]["start time"] = convert_time(tmp_value)
                 elif tmp_key == "Surface":
-                    venue_dict["surface"] = tmp_value
+                    self.json["venue"]["surface"] = tmp_value
                 elif tmp_key == "Duration":
-                    date_dict["duration"] = convert_duration(tmp_value)
+                    self.json["datetime"]["duration"] = convert_duration(tmp_value)
                 elif tmp_key == "Attendance":
                     # We need to replace commas for int to work
-                    venue_dict["attendance"] = int(tmp_value.replace(',', ''))
+                    self.json["venue"]["attendance"] = int(tmp_value.replace(',', ''))
                 elif tmp_key == "Weather":
-                    weather_dict = convert_weather(tmp_value)
+                    self.json["weather"] = convert_weather(tmp_value)
                 elif tmp_key == "Vegas Line":
                     (team_code, line) = convert_vegas_line(tmp_value)
-                    betting_dict["winner"] = team_code
-                    betting_dict["speard"] = line
+                    self.json["betting"]["winner"] = team_code
+                    self.json["betting"]["speard"] = line
                 elif tmp_key == "Over/Under":
-                    betting_dict["over under"] = convert_overunder(tmp_value)
-
-        # Insert the finished dictionary into the json_dict
-        self.json_dict["venue"] = venue_dict
-        self.json_dict["datetime"] = date_dict
-        self.json_dict["betting"] = betting_dict
-        self.json_dict["weather"] = weather_dict
+                    self.json["betting"]["over under"] = convert_overunder(tmp_value)
 
     def print_soups(self):
         """ Print out all the soups. """
@@ -150,11 +141,11 @@ class Converter:
 
     def __repr__(self):
         """ Method that returns a representation of the contents. """
-        return self.json_dict.__repr__()
+        return self.json.__repr__()
 
     def __str__(self):
         """ Method that returns a string of the contents for printing. """
-        return self.json_dict.__str__()
+        return self.json.__str__()
 
 
 if __name__ == '__main__':
