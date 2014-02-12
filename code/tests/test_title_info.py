@@ -12,12 +12,16 @@ class TestGameInfo(unittest.TestCase):
                 convert_title_teams("St. Louis Rams at Seattle Seahawks"),
                 ("SEA", "STL")
                 )
+        self.assertEqual(
+                convert_title_teams("Baltimore Ravens vs. New York Giants"),
+                ("NYG", "BAL")
+                )
         # Failure
         self.assertRaises(
                 KeyError, convert_title_teams, "Rams at Seahawks"
                 )
         self.assertRaises(
-                IndexError, convert_title_teams,
+                ValueError, convert_title_teams,
                 "St. Louis Rams @ Seattle Seahawks"
                 )
 
