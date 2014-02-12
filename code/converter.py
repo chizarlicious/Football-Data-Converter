@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import json
 from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
 from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
+from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
 
 
 class Converter:
@@ -31,6 +33,7 @@ class Converter:
             self.soups[key] = BeautifulSoup(cont, parse_only=value)
 
         # Parse the various tables
+        self.__parse_title()
         self.__parse_officials()
         self.__parse_game_info()
 
@@ -64,30 +67,30 @@ class Converter:
                 "over under": None
                 }
         teamstats = {
-                "first downs" : None,
-                "rush" : {
-                    "plays" : None,
-                    "yards" : None,
-                    "touchdowns" : None,
-                    },
-                "pass" : {
+                "first downs": None,
+                "rush": {
                     "plays": None,
-                    "yards" : None,
-                    "touchdowns" : None,
-                    "successful" : None,
-                    "interceptions" : None
+                    "yards": None,
+                    "touchdowns": None,
                     },
-                "sacks" : {
-                    "plays" : None,
-                    "yards" : None
+                "pass": {
+                    "plays": None,
+                    "yards": None,
+                    "touchdowns": None,
+                    "successful": None,
+                    "interceptions": None
                     },
-                "fumbles" : {
-                    "plays" : None,
-                    "lost" : None
+                "sacks": {
+                    "plays": None,
+                    "yards": None
                     },
-                "penalties" : {
-                    "plays" : None,
-                    "yards" : None
+                "fumbles": {
+                    "plays": None,
+                    "lost": None
+                    },
+                "penalties": {
+                    "plays": None,
+                    "yards": None
                     }
                 }
         # We use deep copy so that we can uniquely set values in each, instead
@@ -98,12 +101,27 @@ class Converter:
     def __set_strainers(self):
         """ Set up a list of hard coded SoupStrainers. """
         self.strainers = {}
+        self.strainers["title"] = SoupStrainer("title")
         self.strainers["game_info"] = SoupStrainer(id="game_info")
         self.strainers["ref_info"] = SoupStrainer(id="ref_info")
         self.strainers["team_stats"] = SoupStrainer(id="team_stats")
         self.strainers["pbp_data"] = SoupStrainer(id="pbp_data")
         # Starters needs work; there is no easy tag to grab
         #self.strainers["starters"] = SoupStrainer(name="starters")
+
+    def __parse_title(self):
+        """ Parse the title tag from the HTML. This sets the two teams and the
+        date."""
+        soup = self.soups["title"]
+        text = soup.find("title").get_text(strip=True)
+        teams = text.split('-')[0]
+        fulldate = text.split('-')[1]
+        # Parse teams to codes
+        (home, away) = convert_title_teams(teams)
+        self.json["home team"] = home
+        self.json["away team"] = away
+        # Parse time
+        self.json["datetime"]["date"] = convert_title_date(fulldate)
 
     def __parse_officials(self):
         """ Set up the officials dictionary and add it to self.json """
@@ -191,4 +209,7 @@ if __name__ == '__main__':
 
     for raw_file in args.file:
         converter = Converter(raw_file)
-        print(converter)
+        #print(converter)
+        print(json.dumps(converter.json, sort_keys=True, indent=2, separators=(',', ': ')))
+
+        #converter.print_soups()
