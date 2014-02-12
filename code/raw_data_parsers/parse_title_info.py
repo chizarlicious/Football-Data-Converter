@@ -17,10 +17,18 @@ def convert_title_teams(title_string):
 
     raises:
         KeyError if the team doesn't exist in names_to_code.
-        IndexError if there is no " at " to break on.
+        ValueError if there is no " at " or " vs. " to break on.
     """
-    away = title_string.split(' at ')[0].strip()
-    home = title_string.split(' at ')[1].strip()
+    # Determine if the teams are separated by at or vs.
+    if " at " in title_string:
+        split_key = " at "
+    elif " vs. " in title_string:
+        split_key = " vs. "
+    else:
+        raise ValueError
+    # Split and try to assign a code
+    away = title_string.split(split_key)[0].strip()
+    home = title_string.split(split_key)[1].strip()
     away_code = names_to_code[away]
     home_code = names_to_code[home]
     return (home_code, away_code)
