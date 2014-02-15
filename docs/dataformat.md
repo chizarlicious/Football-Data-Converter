@@ -32,6 +32,7 @@ The Venue Object contains information about the venue where the game was
 played.
 
 * **stadium**: The name of the stadium where the game was played.
+* **dome**: True if the stadium is a dome, false otherwise.
 * **attendance**: The number of attending spectators.
 * **surface**: The playing field surface type.
 
