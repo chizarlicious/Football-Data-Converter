@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
 from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
+from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
 
 class Converter:
@@ -36,6 +37,7 @@ class Converter:
         self.__parse_title()
         self.__parse_officials()
         self.__parse_game_info()
+        self.__parse_team_stats()
 
     def __init_json(self):
         """ Initialize the dictionary for the output JSON. """
@@ -147,7 +149,37 @@ class Converter:
 
     def __parse_team_stats(self):
         """ Set up the team stats dictionaries and add it to self.json """
-        pass
+        soup = self.soups["team_stats"]
+        # Find each row of the table
+        rows = soup.find_all("tr")
+        home_dict = self.json["team stats"]["home"]
+        away_dict = self.json["team stats"]["away"]
+        for row in rows:
+            # Find each column of the table
+            cols = row.find_all("td")
+            if cols:  # This if removes the header
+                # Extract the key and both the home and away team values
+                key = cols[0].get_text(strip=True)
+                tmp_away = cols[1].get_text(strip=True)
+                tmp_home = cols[2].get_text(strip=True)
+                if key == "First downs":
+                    away_dict["first downs"] = int(tmp_away)
+                    home_dict["first downs"] = int(tmp_home)
+                elif key == "Rush-yards-TDs":
+                    away_dict["rush"] = convert_rush_info(tmp_away)
+                    home_dict["rush"] = convert_rush_info(tmp_home)
+                elif key == "Comp-Att-Yd-TD-INT":
+                    away_dict["pass"] = convert_pass_info(tmp_away)
+                    home_dict["pass"] = convert_pass_info(tmp_home)
+                elif key == "Sacked-yards":
+                    away_dict["sacks"] = convert_sack_info(tmp_away)
+                    home_dict["sacks"] = convert_sack_info(tmp_home)
+                elif key == "Fumbles-lost":
+                    away_dict["fumbles"] = convert_fumble_info(tmp_away)
+                    home_dict["fumbles"] = convert_fumble_info(tmp_home)
+                elif key == "Penalties-yards":
+                    away_dict["penalties"] = convert_penalty_info(tmp_away)
+                    home_dict["penalties"] = convert_penalty_info(tmp_home)
 
     def __parse_game_info(self):
         """ Set up the game info dictionary and add it to self.json """
