@@ -1,6 +1,34 @@
 #!/usr/bin/env python3
 
 
+def split_on_dashes(dash_string):
+    """Takes a string of numbers separated by '-' and splits it, assuming that
+    '--' means a separator followed by a negative number.
+
+    args:
+        dash_string: A string of items separated by '-', with a '--' indicated
+        a negative on the item following.
+
+    returns:
+        A tuple of strings.
+    """
+    out_list = dash_string.split('-')
+
+    to_neg = []
+    # Find all the '' entries created by splitting "--". Mark the next entry in
+    # the list as negative.
+    for i in range(len(out_list)):
+        if not out_list[i] and not (i >= (len(out_list) - 1)):
+            to_neg.append(i + 1)
+    # Add a negative to marked entries
+    for i in to_neg:
+        out_list[i] = '-' + out_list[i]
+    # Remove blank entries (which count as False for if tests) and '-' entries
+    final_out_list = [x for x in out_list if (x and x != '-')]
+
+    return tuple(final_out_list)
+
+
 def convert_rush_info(rush_string):
     """Takes a string of rushing statistics and returns a dictionary.
 
@@ -13,7 +41,7 @@ def convert_rush_info(rush_string):
     raises:
         ValueError if the input can not be converted sensibly
     """
-    rush_split = rush_string.split('-')
+    rush_split = split_on_dashes(rush_string)
     plays = int(rush_split[0])
     yards = int(rush_split[1])
     touchdowns = int(rush_split[2])
@@ -34,7 +62,7 @@ def convert_pass_info(pass_string):
     raises:
         ValueError if the input can not be converted sensibly
     """
-    pass_split = pass_string.split('-')
+    pass_split = split_on_dashes(pass_string)
     successful = int(pass_split[0])
     plays = int(pass_split[1])
     yards = int(pass_split[2])
@@ -56,7 +84,7 @@ def convert_sack_info(sack_string):
     raises:
         ValueError if the input can not be converted sensibly
     """
-    sack_split = sack_string.split('-')
+    sack_split = split_on_dashes(sack_string)
     plays = int(sack_split[0])
     yards = -int(sack_split[1])
     return {"plays": plays, "yards": yards}
@@ -74,7 +102,7 @@ def convert_fumble_info(fumble_string):
     raises:
         ValueError if the input can not be converted sensibly
     """
-    fumble_split = fumble_string.split('-')
+    fumble_split = split_on_dashes(fumble_string)
     plays = int(fumble_split[0])
     lost = int(fumble_split[1])
     return {"plays": plays, "lost": lost}
@@ -92,7 +120,7 @@ def convert_penalty_info(penalty_string):
     raises:
         ValueError if the input can not be converted sensibly
     """
-    penalty_split = penalty_string.split('-')
+    penalty_split = split_on_dashes(penalty_string)
     plays = int(penalty_split[0])
     yards = -int(penalty_split[1])
     return {"plays": plays, "yards": yards}

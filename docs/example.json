@@ -1,26 +1,132 @@
 [
-    { 
-        "season" : 2012,
-        "games" : [
-        { 
-            "home team" : "NYG",
-            "away team" : "DAL",
-            "date" : "2012-09-05",
-            "plays" : [
-            { 
-                "time" : 0,
-                "home team score" : 0,
-                "away team score" : 0,
-                "offense": "DAL",
-                "down" : null,
-                "to go" : null,
-                "yards to goal" : null,
-                "score type" : null,
-                "scoring team" : null,
-                "_description_" : "D.Bailey kicks 69 yards from DAL 35 to NYG -4. D.Wilson to NYG 16 for 20 yards (A.Holmes)."
+{
+    "season" : 2012,
+    "games" : [
+    {
+        "home team": "BAL",
+        "away team": "DEN",
+        "venue": {
+            "stadium" : "Sports Authority Field at Mile High",
+            "dome" : false,
+            "surface" : "grass",
+            "attendance" : 76732,
+        },
+        "datetime" : {
+            "date" : "2013-01-12",
+            "start time" : "14:36",
+            "duration" : 15060,
+        },
+        "weather" : {
+            "temperature" : 13,
+            "relative humidity" : 0.62,
+            "wind speed" : 8,
+            "wind chill" : null
+        },
+        "betting" : {
+            "winner" : "DEN",
+            "spread" : -9,
+            "over under" : +44.5,
+        },
+        "officials" : {
+            "referee" : "Bill Vinovich",
+            "umpire" : "Undrey Wash",
+            "head linesman" : "George Hayward",
+            "field judge" : "Bob Waggoner",
+            "back judge" : "Billy Smith",
+            "side judge" : "Ronald Torbert",
+            "line judge" : "Ron Marinucci",
+        },
+        "team stats" : {
+            "home" : {
+                "first downs" : 30,
+                "rush" : {
+                    "plays" : 41,
+                    "yards" : 125,
+                    "touchdowns" : 0,
+                },
+                "pass" : {
+                    "plays": 43,
+                    "yards" : 290,
+                    "touchdowns" : 3,
+                    "successful" : 28,
+                    "interceptions" : 2
+                },
+                "sacks" : {
+                    "plays" : 3,
+                    "yards" : -17
+                },
+                "fumbles" : {
+                    "plays" : 2,
+                    "lost" : 1
+                },
+                "penalties" : {
+                    "plays" : 10,
+                    "yards" : -87
+                }
+            },
+            "away" : {
+                "first downs" : 21,
+                "rush" : {
+                    "plays" : 39,
+                    "yards" : 155,
+                    "touchdowns" : 1,
+                },
+                "pass" : {
+                    "plays": 34,
+                    "yards" : 331,
+                    "touchdowns" : 3,
+                    "successful" : 18,
+                    "interceptions" : 0
+                },
+                "sacks" : {
+                    "plays" : 1,
+                    "yards" : -7
+                },
+                "fumbles" : {
+                    "plays" : 1,
+                    "lost" : 1
+                },
+                "penalties" : {
+                    "plays" : 8,
+                    "yards" : -56
+                }
             }
-            ]
+        },
+        "plays" : [
+        {
+            "number" : 28,
+            "score" : {
+                "home" : 7,
+                "away" : 14
+            },
+            "state" : {
+                "offense": "DEN",
+                "down" : 2,
+                "yards to first down" : 10,
+                "yards to goal" : 36,
+                "time" : 398
+            },
+            "play" : {
+                "type" : "complete pass",
+                "scoring" : {  // Should be null, but left as an example
+                    "type" : null,
+                    "team" : null
+                },
+            },
+            "turnover" : { // Should be null, but left as an example
+                "type" : null,
+                "recovered by" : null
+            },
+            "penalty" : {
+                "type" : "Illegal Use of Hands",
+                "on" : "DEN",
+                "player" : "Terrence Cody",
+                "yards" : -5,
+                "no play": true
+            }
         }
         ]
     }
+    ]
+}
 ]
