@@ -1,15 +1,31 @@
 #!/usr/bin/env python3
 
 import unittest
-from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
+from raw_data_parsers.parse_team_stats import split_on_dashes, convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
 
 class TestTeamStats(unittest.TestCase):
+
+    def test_split_on_dashes(self):
+        # Successful
+        self.assertEqual(
+                split_on_dashes("1-2--3--4--5-6"),
+                ("1", "2", "-3", "-4", "-5", "6")
+                )
+        self.assertEqual(split_on_dashes("-1--2"), ("-1", "-2"))
+        self.assertEqual(split_on_dashes("1"), ("1",))
+        self.assertEqual(split_on_dashes("-1"), ("-1",))
+        self.assertEqual(split_on_dashes("-A"), ("-A",))
+        self.assertEqual(split_on_dashes("-"), ())
+        self.assertEqual(split_on_dashes("--"), ())
 
     def test_convert_rush_info(self):
         # Successful
         self.assertEqual(convert_rush_info("16-34-0"),
                 {"plays": 16, "yards": 34, "touchdowns": 0}
+                )
+        self.assertEqual(convert_rush_info("16--34-0"),
+                {"plays": 16, "yards": -34, "touchdowns": 0}
                 )
         # Failure raises ValueError
         self.assertRaises(ValueError, convert_rush_info, "16-34 0")
@@ -19,6 +35,10 @@ class TestTeamStats(unittest.TestCase):
         # Successful
         self.assertEqual(convert_pass_info("18-34-331-3-0"),
                 {"plays": 34, "yards": 331, "touchdowns": 3,
+                "interceptions": 0, "successful": 18}
+                )
+        self.assertEqual(convert_pass_info("18-34--331-3-0"),
+                {"plays": 34, "yards": -331, "touchdowns": 3,
                 "interceptions": 0, "successful": 18}
                 )
         # Failure raises ValueError
