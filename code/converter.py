@@ -7,6 +7,8 @@ from raw_data_parsers.parse_game_info import convert_time, convert_weather, conv
 from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
 from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
+from play_by_play import PlayByPlay
+
 
 class Converter:
 
@@ -38,6 +40,10 @@ class Converter:
         self.__parse_officials()
         self.__parse_game_info()
         self.__parse_team_stats()
+
+        # Parse Play-by-play
+        self.pbp = PlayByPlay(self.soups["pbp_data"])
+        self.json["plays"] = self.pbp.json
 
     def __init_json(self):
         """ Initialize the dictionary for the output JSON. """

@@ -1,7 +1,210 @@
 #!/usr/bin/env python3
 
 from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
-from data_helpers.team_list import team_codes
+from data_helpers.team_list import team_codes, pfr_codes_to_code
+
+
+def row_type(row):
+    """Takes a row filtered from BeautifulSoup and returns its type.
+
+    args:
+        row: A row from BrautifulSoup, filtered with soup.find_all("tr")
+
+    returns:
+        An integer indicating the type of row:
+            -1: Header
+            0: Normal Row
+            1: 1st Quarter
+            2: 2nd Quarter
+            3: 3rd Quarter
+            4: 4th Quarter
+            5: New Overtime
+            6: End of Game/Overtime
+    """
+    plain_text = row.get_text(strip=True)
+    if "QuarterTimeDown" in plain_text:
+        return -1
+    elif "1st Quarter" in plain_text:
+        return 1
+    elif "2nd Quarter" in plain_text:
+        return 2
+    elif "3rd Quarter" in plain_text:
+        return 3
+    elif "4th Quarter" in plain_text:
+        return 4
+    elif "End" in plain_text:
+        return 6
+    elif "Overtime" in plain_text:
+        return 5
+    else:
+        return 0
+
+
+def get_teams(header_soup):
+    """Takes a BeautifulSoup4 row and returns the home and away teams.
+
+    args:
+        header_soup: A BS4 row containing the play-by-play header information.
+
+    returns:
+        A tuple of (home, away)
+
+    raises:
+        KeyError if the team codes don't exist, or if the header can't be split
+            correctly.
+    """
+    cols = header_soup.find_all("th")
+    home = pfr_codes_to_code[cols[7].get_text(strip=True)]
+    away = pfr_codes_to_code[cols[6].get_text(strip=True)]
+    return (home, away)
+
+
+def get_kicking_team(cols_soup):
+    """Takes a BeautifulSoup4 row and returns the kicking team on kickoff.
+
+    args:
+        cols_soup: A BS4 list of columns containing the play-by-play
+        information for a kickoff.
+
+    returns:
+        A string of the kicking team's code.
+
+    raises:
+        KeyError if the team codes don't exist.
+    """
+    split_cols = cols_soup[4].get_text(strip=True).split()
+    return pfr_codes_to_code[split_cols[0]]
+
+
+def get_play_type(cols_soup):
+    """Takes a BeautifulSoup4 row and returns the play type
+
+    args:
+        cols_soup: A BS4 list of columns containing the play-by-play
+        information.
+
+    returns:
+        A string from the following list:
+            "punt", "kick off", "complete pass", "incomplete pass", "run",
+            "sack",
+    """
+    pt = cols_soup[5].get_text(' ', strip=True)
+    pt = pt.replace('\n', ' ')
+    pt = pt.lower()
+    # Punts
+    if "punt" in pt:
+        return "punt"
+    elif "two point attempt:" in pt or "conversion" in pt:
+        if "incomplete" in pt:
+            return "two point conversion with incomplete pass"
+        elif "complete" in pt:
+            return "two point conversion with complete pass"
+        else:
+            return "two point conversion with run"
+    elif "kicks off" in pt:
+        return "kick off"
+    # Sacks
+    elif "sack" in pt:
+        return "sack"
+    # Field Goal
+    elif "field goal" in pt:
+        return "field goal"
+    # Timeout
+    elif "Timeout" in pt:
+        return "timeout"
+    # Pass
+    elif "pass complete" in pt:
+        return "complete pass"
+    elif "pass incomplete" in pt:
+        return "incomplete pass"
+    # Extra point
+    elif "extra point" in pt:
+        return "extra point"
+    # Time Out
+    elif "timeout" in pt:
+        return "timeout"
+    # Kneel
+    elif "kneel" in pt:
+        return "kneel"
+    # Spike
+    elif "spiked" in pt:
+        return "spike"
+    # Penalty before snap
+    elif pt.split()[0] == "penalty":
+        return "penalty"
+    # Run
+    elif "for" in pt and ("yard" in pt or "no gain" in pt):
+        return "run"
+    # Unmatched!!!!
+    else:
+        print("Unmatched play type!", pt)
+        return None
+
+
+def get_scoring_type(cols_soup):
+    """Takes a BeautifulSoup4 row and returns the scoring type
+
+    args:
+        cols_soup: A BS4 list of columns containing the play-by-play
+        information.
+
+    returns:
+        A string from the following list:
+            "touchdown", "field goal", "two point conversion", "safety",
+            "extra point"
+    """
+    pt = cols_soup[5].get_text(' ', strip=True)
+    pt = pt.replace('\n', ' ')
+    pt = pt.lower()
+    if "extra point" in pt:
+        return "extra point"
+    elif "touchdown" in pt:
+        return "touchdown"
+    elif "safety" in pt:
+        return "safety"
+    elif "two point" in pt:
+        return "two point conversion"
+    elif "field goal" in pt:
+        return "field goal"
+    else:
+        print("Unmatched Score type!", pt)
+        return None
+
+
+def convert_int(int_string):
+    """Takes an int string and returns an integer.
+
+    args:
+        int_string: A string of an integer or ''.
+
+    returns:
+        An int, or None.
+
+    raises:
+        ValueError if the input is not an integer or ""
+    """
+    if not int_string:
+        return None
+    else:
+        return int(int_string)
+
+
+def convert_quarter(quarter_string):
+    """Takes a quarter string and returns an integer.
+
+    args:
+        quarter_string: A string of 1-4, or "OT".
+
+    returns:
+        An int 1-5, with 5 indicating overtime.
+
+    raises:
+        ValueError if the input is not an integer or "OT"
+    """
+    if quarter_string == "OT":
+        return 5
+    else:
+        return int(quarter_string)
 
 
 def convert_game_clock(time_string, quarter):
@@ -15,11 +218,15 @@ def convert_game_clock(time_string, quarter):
 
     returns:
         The number of seconds since the game began as an integer. Failure
-            raises GameClockError.
+            raises GameClockError. A blank string returns None.
 
     raises:
         GameClockError: If the game clock contains an invalid time format.
     """
+    # For an empty string we return None
+    if not time_string:
+        return None
+    # If it has a valid format, start parsing
     time_split = time_string.split(':')
     if time_split[0].startswith('-') or time_split[1].startswith('-'):
         raise GameClockError("Game clock time is negative.")
@@ -57,15 +264,25 @@ def convert_field_position(position_string, offense):
         offense: The team code of the team on offense.
 
     returns:
-        The number of yards to the goal line as an integer.
+        The number of yards to the goal line as an integer. None if either
+        input is blank.
 
     raises:
         FieldPositionError: If the field position is invalid.
         TeamCodeError: If the offense is not a valid team, or the field
             position team marker is not a valid team.
     """
+    # Skip if blank
+    if not position_string or not offense:
+        return None
+    # If the position string is "50", it doesn't have a team code, but we know
+    # the answer is 50.
+    if position_string == "50":
+        return 50
+    # Parse the result
     position_split = position_string.split()
-    pos_team_code = position_split[0]
+    pos_team_code_pfr = position_split[0]
+    pos_team_code = pfr_codes_to_code[pos_team_code_pfr]
     # Check that the listed teams are valid
     if offense not in team_codes:
         raise TeamCodeError("Offense not a valid team code.")
