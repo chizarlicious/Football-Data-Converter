@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
-from data_helpers.team_list import team_codes, pfr_codes_to_code
+from data_helpers.team_list import team_codes, pfr_codes, pfr_codes_to_code
 
 
 def row_type(row):
-    """Takes a row filtered from BeautifulSoup and returns its type.
+    """Takes a row of plain text and returns the type.
 
     args:
-        row: A row from BrautifulSoup, filtered with soup.find_all("tr")
+        row: A row from BrautifulSoup, filtered with soup.find_all("tr") and
+        parsed with get_text(' ', strip=True)
 
     returns:
         An integer indicating the type of row:
@@ -21,20 +22,19 @@ def row_type(row):
             5: New Overtime
             6: End of Game/Overtime
     """
-    plain_text = row.get_text(strip=True)
-    if "QuarterTimeDown" in plain_text:
+    if "Quarter Time Down" in row:
         return -1
-    elif "1st Quarter" in plain_text:
+    elif "1st Quarter" in row:
         return 1
-    elif "2nd Quarter" in plain_text:
+    elif "2nd Quarter" in row:
         return 2
-    elif "3rd Quarter" in plain_text:
+    elif "3rd Quarter" in row:
         return 3
-    elif "4th Quarter" in plain_text:
+    elif "4th Quarter" in row:
         return 4
-    elif "End" in plain_text:
+    elif "End" in row:
         return 6
-    elif "Overtime" in plain_text:
+    elif "Overtime" in row:
         return 5
     else:
         return 0
@@ -282,12 +282,13 @@ def convert_field_position(position_string, offense):
     # Parse the result
     position_split = position_string.split()
     pos_team_code_pfr = position_split[0]
-    pos_team_code = pfr_codes_to_code[pos_team_code_pfr]
+    if pos_team_code_pfr not in pfr_codes:
+        raise TeamCodeError("Field Position does not reference a valid team code.")
+    else:
+        pos_team_code = pfr_codes_to_code[pos_team_code_pfr]
     # Check that the listed teams are valid
     if offense not in team_codes:
         raise TeamCodeError("Offense not a valid team code.")
-    elif pos_team_code not in team_codes:
-        raise TeamCodeError("Field Position does not reference a valid team code.")
     # Make sure we have an integer as a field position
     try:
         yard = int(position_split[1])

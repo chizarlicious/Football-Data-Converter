@@ -50,7 +50,7 @@ class PlayByPlay:
         rows = soup.find_all("tr")
         for row in rows:
             # Deal with the different row types
-            r_type = row_type(row)
+            r_type = row_type(row.get_text(' ', strip=True))
             # When setting the quarter, we need a special case to handle
             # overtimes after the first
             if r_type == 5 and self.last_play_info["quarter"] >= 5:
@@ -68,7 +68,7 @@ class PlayByPlay:
             # Set the play class, which is used to indicate scores, turnovers,
             # and penalties
             self.__set_class(row)
-            
+
             # Find each column of the table
             cols = row.find_all("td")
             if cols:  # This if removes the header
@@ -99,7 +99,7 @@ class PlayByPlay:
                     kick_team = get_kicking_team(cols)
                     self.current_play_info["offense"] = self.__flip_team(kick_team)
 
-                # Parse state 
+                # Parse state
                 pbp_dict["number"] = int(cols[5].a["name"].split('_')[1]) - 1
                 pbp_dict["state"] = self.__set_state(cols)
                 self.json.append(pbp_dict)
@@ -115,7 +115,7 @@ class PlayByPlay:
         returns:
             Nothing, but sets self.is_scoring, self.is_penalty,
             self.is_pchange.
-        """ 
+        """
         row_class = row["class"]
         self.is_scoring = ("is_scoring" in row_class)
         self.is_penalty = ("has_penalty" in row_class)

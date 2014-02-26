@@ -8,6 +8,13 @@ team_codes = frozenset(
             "STL", "TB", "TEN", "WAS"]
         )
 
+pfr_codes = frozenset(
+        ["CRD", "ATL", "RAV", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN",
+            "DET", "GNB", "HTX", "CLT", "JAX", "KAN", "MIA", "MIN", "NWE",
+            "NOR", "NYG", "NYJ", "RAI", "PHI", "PIT", "SDG", "SFO", "SEA",
+            "RAM", "TAM", "OTI", "WAS"]
+        )
+
 codes_to_name = {
         "AFC": "AFC Probowl Team",
         "ARI": "Arizona Cardinals",
