@@ -193,7 +193,7 @@ class PlayByPlay:
         play = {}
 
         # Set the type
-        play["type"] = get_play_type(cols)
+        play["type"] = get_play_type(cols[5].get_text(' ', strip=True))
 
         if not self.is_scoring:
             return play

@@ -76,24 +76,23 @@ def get_kicking_team(cols_soup):
     return pfr_codes_to_code[split_cols[0]]
 
 
-def get_play_type(cols_soup):
-    """Takes a BeautifulSoup4 row and returns the play type
+def get_play_type(pt):
+    """Takes a string and returns the play type
 
     args:
-        cols_soup: A BS4 list of columns containing the play-by-play
-        information.
+        pt: A string containing the play-by-play information.
 
     returns:
         A string from the following list:
             "punt", "kick off", "complete pass", "incomplete pass", "run",
             "sack",
     """
-    pt = cols_soup[5].get_text(' ', strip=True)
     pt = pt.replace('\n', ' ')
     pt = pt.lower()
     # Punts
     if "punt" in pt:
         return "punt"
+    # Two point conversion
     elif "two point attempt:" in pt or "conversion" in pt:
         if "incomplete" in pt:
             return "two point conversion with incomplete pass"
@@ -109,14 +108,11 @@ def get_play_type(cols_soup):
     # Field Goal
     elif "field goal" in pt:
         return "field goal"
-    # Timeout
-    elif "Timeout" in pt:
-        return "timeout"
     # Pass
-    elif "pass complete" in pt:
-        return "complete pass"
     elif "pass incomplete" in pt:
         return "incomplete pass"
+    elif "pass complete" in pt:
+        return "complete pass"
     # Extra point
     elif "extra point" in pt:
         return "extra point"
