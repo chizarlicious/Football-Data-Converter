@@ -49,6 +49,9 @@ class Converter:
         self.__parse_team_stats()
         self.__parse_starter()
 
+        # Parse all players onto teams, the starter list isn't enough
+        self.__get_all_players()
+
         # Parse Play-by-play
         self.pbp = PlayByPlay(self.soups["pbp_data"])
         self.json["plays"] = self.pbp.json
@@ -127,6 +130,9 @@ class Converter:
         self.strainers["team_stats"] = SoupStrainer(id="team_stats")
         self.strainers["pbp_data"] = SoupStrainer(id="pbp_data")
         self.strainers["starters"] = SoupStrainer("table", id="")
+        self.strainers["def_stats"] = SoupStrainer("table", id="def_stats")
+        self.strainers["off_stats"] = SoupStrainer("table", id="skill_stats")
+        self.strainers["kick_stats"] = SoupStrainer("table", id="kick_stats")
 
     def __parse_title(self):
         """ Parse the title tag from the HTML. This sets the two teams and the
@@ -275,6 +281,29 @@ class Converter:
                     # We also add to our internal set used to get teams from
                     # players in playbyplay
                     p_set.add(player)
+
+    def __get_all_players(self):
+        """ Get all player names from the various tables and store them in the
+        player sets. """
+        l_soups = [self.soups["def_stats"]]
+        l_soups.append(self.soups["off_stats"])
+        l_soups.append(self.soups["kick_stats"])
+
+        # Each soup is essentially the same, and we only care about the first
+        # two columns
+        for soup in l_soups:
+            body = soup.find_all("tbody")
+            for row in body[0].find_all("tr"):
+                # The rows with players have blank classes
+                if row["class"] == ['']:
+                    cols = row.find_all("td")
+                    player = cols[0].get_text(' ', strip=True).replace('\n', ' ')
+                    team_code = cols[1].get_text(' ', strip=True).replace('\n', ' ')
+                    # Assign by team code
+                    if team_code == self.home_team:
+                        self.home_players.add(player)
+                    elif team_code == self.away_team:
+                        self.away_players.add(player)
 
     def print_soups(self):
         """ Print out all the soups. """
