@@ -6,6 +6,7 @@ from copy import deepcopy
 from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
 from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
+from data_helpers.team_list import names_to_code
 
 from play_by_play import PlayByPlay
 
@@ -19,6 +20,12 @@ class Converter:
         args:
             file_name: A string containing the name of a file to open
         """
+        # Set up some internal variables
+        self.home_team = None
+        self.away_team = None
+        self.home_players = set([])
+        self.away_players = set([])
+
         # Initialize the dictionary to convert to JSON
         self.__init_json()
 
@@ -40,6 +47,7 @@ class Converter:
         self.__parse_officials()
         self.__parse_game_info()
         self.__parse_team_stats()
+        self.__parse_starter()
 
         # Parse Play-by-play
         self.pbp = PlayByPlay(self.soups["pbp_data"])
@@ -73,6 +81,10 @@ class Converter:
                 "winner": None,
                 "speard": None,
                 "over under": None
+                }
+        self.json["players"] = {
+                "home": {},
+                "away": {}
                 }
         teamstats = {
                 "first downs": None,
@@ -114,8 +126,7 @@ class Converter:
         self.strainers["ref_info"] = SoupStrainer(id="ref_info")
         self.strainers["team_stats"] = SoupStrainer(id="team_stats")
         self.strainers["pbp_data"] = SoupStrainer(id="pbp_data")
-        # Starters needs work; there is no easy tag to grab
-        #self.strainers["starters"] = SoupStrainer(name="starters")
+        self.strainers["starters"] = SoupStrainer("table", id="")
 
     def __parse_title(self):
         """ Parse the title tag from the HTML. This sets the two teams and the
@@ -127,7 +138,9 @@ class Converter:
         # Parse teams to codes
         (home, away) = convert_title_teams(teams)
         self.json["home team"] = home
+        self.home_team = home
         self.json["away team"] = away
+        self.away_team = away
         # Parse time
         self.json["datetime"]["date"] = convert_title_date(fulldate)
 
@@ -217,9 +230,51 @@ class Converter:
                 elif tmp_key == "Vegas Line":
                     (team_code, line) = convert_vegas_line(tmp_value)
                     self.json["betting"]["winner"] = team_code
-                    self.json["betting"]["speard"] = line
+                    self.json["betting"]["spread"] = line
                 elif tmp_key == "Over/Under":
                     self.json["betting"]["over under"] = convert_overunder(tmp_value)
+
+    def __parse_starter(self):
+        """ Parse the list of starter and their positions. """
+        soup = self.soups["starters"]
+        # We get all the elements the match data-stat="pos", which is the table
+        # element that has the words "Pos", which is unique to these tables.
+        # Once we have these elements, we find their parents to get the whole
+        # table.
+        ths = soup.find_all("th", attrs={"data-stat": "pos"})
+        for th in ths:
+            table = th.parent.parent  # th.parent == row, row.parent == table
+            for row in table.find_all("tr"):
+                # We read through the rows in order. Since the header with the
+                # name always comes before the players for a team, we can set
+                # the dictionary at the first time we hit it and it will be
+                # good for the rest of the table.
+
+                # Header row with team name
+                if "stat_total" in row["class"]:
+                    team_name = row.get_text(' ', strip=True)
+                    team_code = names_to_code[team_name]
+                    # Set the working dictionary based on the team
+                    if team_code == self.home_team:
+                        p_dict = self.json["players"]["home"]
+                        p_set = self.home_players
+                    else:
+                        p_dict = self.json["players"]["away"]
+                        p_set = self.away_players
+                # Normal rows have blank classes
+                elif row["class"] == ['']:
+                    cols = row.find_all("td")
+                    player = cols[0].get_text(' ', strip=True).replace('\n', ' ')
+                    position = cols[1].get_text(' ', strip=True).replace('\n', ' ')
+                    # We try to add the player to the list, but if the list
+                    # doesn't exist, we have to make it first
+                    try:
+                        p_dict[position].append(player)
+                    except KeyError:
+                        p_dict[position] = [player]
+                    # We also add to our internal set used to get teams from
+                    # players in playbyplay
+                    p_set.add(player)
 
     def print_soups(self):
         """ Print out all the soups. """
