@@ -53,7 +53,13 @@ class Converter:
         self.__get_all_players()
 
         # Parse Play-by-play
-        self.pbp = PlayByPlay(self.soups["pbp_data"])
+        self.pbp = PlayByPlay(
+                self.soups["pbp_data"],
+                self.home_team,
+                self.away_team,
+                self.home_players,
+                self.away_players
+                )
         self.json["plays"] = self.pbp.json
 
     def __init_json(self):

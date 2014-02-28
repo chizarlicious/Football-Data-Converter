@@ -3,20 +3,27 @@
 import json
 from copy import deepcopy
 from bs4 import BeautifulSoup, SoupStrainer
-from raw_data_parsers.parse_play_by_play import row_type, get_teams, get_kicking_team, get_play_type, get_scoring_type, convert_int, convert_quarter, convert_game_clock, convert_field_position
+
 from data_helpers.team_list import pfr_codes_to_code, team_codes
+
+from raw_data_parsers.parse_play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
+from raw_data_parsers.parse_play_by_play.play import get_play_type, get_scoring_type
+from raw_data_parsers.parse_play_by_play.general import row_type, get_kicking_team
 
 
 class PlayByPlay:
 
-    def __init__(self, soup):
+    def __init__(self, soup, home_team, away_team, home_players, away_players):
         """Given a BeautifulSoup, parses the play-by-play data.
 
         args:
             file_name: A string containing the name of a file to open
         """
-        # Initialize the dictionary to convert to JSON
+        # Save input variables
         self.soup = soup
+        self.home_players = frozenset(home_players)
+        self.away_players = frozenset(away_players)
+        # Initialize the dictionary to convert to JSON
         self.json = []  # Used to store plays
         self.last_play_info = {
                 "time": 0,
@@ -33,8 +40,8 @@ class PlayByPlay:
                 "away score": 0
                 }
         self.game_info = {
-                "home": None,
-                "away": None
+                "home": home_team,
+                "away": away_team
                 }
         self.is_pchange = False
         self.is_scoring = False
@@ -55,11 +62,6 @@ class PlayByPlay:
             # overtimes after the first
             if r_type == 5 and self.last_play_info["quarter"] >= 5:
                 self.current_play_info["quarter"] = self.last_play_info["quarter"] + 1
-            # Get the teams the first time we're able
-            if r_type == -1 and self.game_info["home"] is None:
-                (home, away) = get_teams(row)
-                self.game_info["home"] = home
-                self.game_info["away"] = away
             # Skip all other special rows
             if r_type != 0:  # 0 indicates a normal row
                 self.last_play_info = deepcopy(self.current_play_info)
