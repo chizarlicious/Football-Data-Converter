@@ -3,9 +3,11 @@
 import json
 from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
+
 from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
 from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
+
 from data_helpers.team_list import names_to_code
 
 from play_by_play import PlayByPlay
@@ -241,8 +243,13 @@ class Converter:
                     self.json["weather"] = convert_weather(tmp_value)
                 elif tmp_key == "Vegas Line":
                     (team_code, line) = convert_vegas_line(tmp_value)
-                    self.json["betting"]["winner"] = team_code
                     self.json["betting"]["spread"] = line
+                    if team_code == self.home_team:
+                        self.json["betting"]["winner"] = "home"
+                    elif team_code == self.away_team:
+                        self.json["betting"]["winner"] = "away"
+                    else:  # We use None when no team is favored
+                        self.json["betting"]["winner"] = None
                 elif tmp_key == "Over/Under":
                     self.json["betting"]["over under"] = convert_overunder(tmp_value)
 

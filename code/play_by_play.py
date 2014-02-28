@@ -4,8 +4,6 @@ import json
 from copy import deepcopy
 from bs4 import BeautifulSoup, SoupStrainer
 
-from data_helpers.team_list import pfr_codes_to_code, team_codes
-
 from raw_data_parsers.parse_play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
 from raw_data_parsers.parse_play_by_play.play import get_play_type, get_scoring_type
 from raw_data_parsers.parse_play_by_play.general import row_type, get_kicking_team
@@ -80,8 +78,10 @@ class PlayByPlay:
                 if self.is_pchange:
                     # For change of possession, we change the team with the
                     # ball
-                    cur_off = self.last_play_info["offense"]
-                    self.current_play_info["offense"] = self.__flip_team(cur_off)
+                    if self.last_play_info["offense"] == "home":
+                        self.current_play_info["offense"] = "away"
+                    else:
+                        self.current_play_info["offense"] = "home"
                     #pbp_dict["turnover"] = self.__set_turnover()
                 else:
                     self.current_play_info["offense"] = self.last_play_info["offense"]
@@ -99,7 +99,10 @@ class PlayByPlay:
                 # On a kickoff, we make sure we have the team right
                 if pbp_dict["play"]["type"] == "kick off":
                     kick_team = get_kicking_team(cols)
-                    self.current_play_info["offense"] = self.__flip_team(kick_team)
+                    if kick_team == self.game_info["home"]:
+                        self.current_play_info["offense"] = "home"
+                    else:
+                        self.current_play_info["offense"] = "away"
 
                 # Parse state
                 pbp_dict["number"] = int(cols[5].a["name"].split('_')[1]) - 1
@@ -108,7 +111,7 @@ class PlayByPlay:
 
                 # Set last play info to current play info
                 self.last_play_info = deepcopy(self.current_play_info)
-                print(json.dumps(pbp_dict, sort_keys=True, indent=2, separators=(',', ': ')))
+                #print(json.dumps(pbp_dict, sort_keys=True, indent=2, separators=(',', ': ')))
 
     def __set_class(self, row):
         """ Takes a BS4 row and extracts the class, using it to set internal
@@ -129,7 +132,7 @@ class PlayByPlay:
 
         returns:
             A state dictionary with the following fields:
-                {"offense": "DEN", "down": 2, "yards to first down": 10,
+                {"offense": "home", "down": 2, "yards to first down": 10,
                 "yards to goal": 36, "time": 398}
         """
         state = {}
@@ -160,7 +163,8 @@ class PlayByPlay:
         state["offense"] = self.current_play_info["offense"]
 
         # Yards to goal
-        state["yards to goal"] = convert_field_position(cols[4].get_text(strip=True), state["offense"])
+        team_code = self.game_info[state["offense"]]
+        state["yards to goal"] = convert_field_position(cols[4].get_text(strip=True), team_code)
 
         return state
 
@@ -190,7 +194,7 @@ class PlayByPlay:
         returns:
             A score dictionary with the following fields:
                 "play": { "type": "complete pass", "scoring":
-                { "type": "touchdown", "team": "DEN" } }
+                { "type": "touchdown", "team": "home" } }
         """
         play = {}
 
@@ -206,11 +210,11 @@ class PlayByPlay:
             # Assign team based on how the score changed
             home_scored = self.current_play_info["home score"] - self.last_play_info["home score"]
             if home_scored:
-                play["scoring"]["team"] = self.game_info["home"]
+                play["scoring"]["team"] = "home"
 
             away_scored = self.current_play_info["away score"] - self.last_play_info["away score"]
             if away_scored:
-                play["scoring"]["team"] = self.game_info["away"]
+                play["scoring"]["team"] = "away"
 
             return play
 
@@ -220,7 +224,7 @@ class PlayByPlay:
 
         returns:
             A turnover dictionary with the following fields:
-                "turnover": { "type": "fumble", "recovered by": "DEN" }
+                "turnover": { "type": "fumble", "recovered by": "home" }
         """
         # TODO: How do we handle multiple tunrovers?
         pass
@@ -232,7 +236,7 @@ class PlayByPlay:
         returns:
             A penalty dictionary with the following fields:
                 "penalty": { "type": "Illegal Use of Hands",
-                "on": "DEN", "player": "Terrence Cody", "yards": -5,
+                "on": "home", "player": "Terrence Cody", "yards": -5,
                 "no play": True }
         """
         #TODO: What do we do when there are multiple penalties?
@@ -240,13 +244,6 @@ class PlayByPlay:
         # marker for the previous play and the current play. However, this
         # doesn't work if we have multiple penalties.
         pass
-
-    def __flip_team(self, team_code):
-        """ Flip the team on offense. """
-        if team_code is self.game_info["home"]:
-            return self.game_info["away"]
-        else:
-            return self.game_info["home"]
 
     def __repr__(self):
         """ Method that returns a representation of the contents. """
