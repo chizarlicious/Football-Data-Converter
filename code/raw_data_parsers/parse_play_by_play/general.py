@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
-from data_helpers.team_list import team_codes, pfr_codes, pfr_codes_to_code
+from data_helpers.team_list import pfr_codes_to_code
 
 
 def row_type(row):
@@ -40,12 +39,11 @@ def row_type(row):
         return 0
 
 
-def get_kicking_team(cols_soup):
-    """Takes a BeautifulSoup4 row and returns the kicking team on kickoff.
+def get_kicking_team(kick_text):
+    """Takes a field position and returns the kicking team on kickoff.
 
     args:
-        cols_soup: A BS4 list of columns containing the play-by-play
-        information for a kickoff.
+        kick_text: A string giving the field position.
 
     returns:
         A string of the kicking team's code.
@@ -53,5 +51,5 @@ def get_kicking_team(cols_soup):
     raises:
         KeyError if the team codes don't exist.
     """
-    split_cols = cols_soup[4].get_text(strip=True).split()
+    split_cols = kick_text.split()
     return pfr_codes_to_code[split_cols[0]]

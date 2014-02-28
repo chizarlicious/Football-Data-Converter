@@ -32,12 +32,16 @@ def convert_quarter(quarter_string):
         An int 1-5, with 5 indicating overtime.
 
     raises:
-        ValueError if the input is not an integer or "OT"
+        ValueError if the input is not an integer [1, 4] or "OT"
     """
     if quarter_string == "OT":
         return 5
     else:
-        return int(quarter_string)
+        quarter = int(quarter_string)
+        if 1 <= quarter <= 4:
+            return quarter
+        else:
+            raise ValueError
 
 
 def convert_game_clock(time_string, quarter):

@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
 
-from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
-from data_helpers.team_list import team_codes, pfr_codes, pfr_codes_to_code
 
-
-def get_play_type(pt):
-    """Takes a string and returns the play type
+def get_play_type(col):
+    """Takes a string and returns the play type.
 
     args:
-        pt: A string containing the play-by-play information.
+        col: A string containing the play-by-play information.
 
     returns:
         A string from the following list:
             "punt", "kick off", "complete pass", "incomplete pass", "run",
             "sack",
     """
-    pt = pt.replace('\n', ' ')
-    pt = pt.lower()
+    pt = col.lower()
     # Punts
     if "punt" in pt:
         return "punt"
@@ -65,31 +61,34 @@ def get_play_type(pt):
         return None
 
 
-def get_scoring_type(cols_soup):
-    """Takes a BeautifulSoup4 row and returns the scoring type
+def get_scoring_type(col):
+    """Takes a string and returns the scoring type.
 
     args:
-        cols_soup: A BS4 list of columns containing the play-by-play
-        information.
+        col: A string containing the play-by-play information.
 
     returns:
         A string from the following list:
             "touchdown", "field goal", "two point conversion", "safety",
             "extra point"
     """
-    pt = cols_soup[5].get_text(' ', strip=True)
-    pt = pt.replace('\n', ' ')
-    pt = pt.lower()
+    pt = col.lower()
+    # Extra Point
     if "extra point" in pt:
         return "extra point"
+    # Touchdown
     elif "touchdown" in pt:
         return "touchdown"
+    # Safety
     elif "safety" in pt:
         return "safety"
-    elif "two point" in pt:
+    # Two Point Conversion
+    elif "two point" in pt or "covnersion" in pt:
         return "two point conversion"
+    # Field Goal
     elif "field goal" in pt:
         return "field goal"
     else:
+    # Unmatched!!!!
         print("Unmatched Score type!", pt)
         return None

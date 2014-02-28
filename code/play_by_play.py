@@ -28,14 +28,16 @@ class PlayByPlay:
                 "quarter": 1,
                 "offense": None,
                 "home score": 0,
-                "away score": 0
+                "away score": 0,
+                "description": ''
                 }
         self.current_play_info = {
                 "time": 0,
                 "quarter": 1,
                 "offense": None,
                 "home score": 0,
-                "away score": 0
+                "away score": 0,
+                "description": ''
                 }
         self.game_info = {
                 "home": home_team,
@@ -74,6 +76,11 @@ class PlayByPlay:
             if cols:  # This if removes the header
                 pbp_dict = {}
 
+                # Extract the plain text description and store it, because it
+                # is used so often
+                description = cols[5].get_text(' ', strip=True).replace('\n', ' ')
+                self.current_play_info["description"] = description
+
                 # Assign offense
                 if self.is_pchange:
                     # For change of possession, we change the team with the
@@ -98,7 +105,8 @@ class PlayByPlay:
                 pbp_dict["play"] = self.__set_play(cols)
                 # On a kickoff, we make sure we have the team right
                 if pbp_dict["play"]["type"] == "kick off":
-                    kick_team = get_kicking_team(cols)
+                    kick_text = cols[4].get_text(' ', strip=True).replace('\n', ' ')
+                    kick_team = get_kicking_team(kick_text)
                     if kick_team == self.game_info["home"]:
                         self.current_play_info["offense"] = "home"
                     else:
@@ -199,13 +207,13 @@ class PlayByPlay:
         play = {}
 
         # Set the type
-        play["type"] = get_play_type(cols[5].get_text(' ', strip=True))
+        play["type"] = get_play_type(self.current_play_info["description"])
 
         if not self.is_scoring:
             return play
         else:
             play["scoring"] = {}
-            play["scoring"]["type"] = get_scoring_type(cols)
+            play["scoring"]["type"] = get_scoring_type(self.current_play_info["description"])
 
             # Assign team based on how the score changed
             home_scored = self.current_play_info["home score"] - self.last_play_info["home score"]
