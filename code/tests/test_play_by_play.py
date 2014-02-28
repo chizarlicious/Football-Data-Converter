@@ -143,7 +143,7 @@ class TestPlayByPlay(unittest.TestCase):
                 )
         self.assertEqual(
                 get_scoring_type("""Hephaestus for no gain. Ares fumbles,
-                    recovered by Aphrodite at DEN --8, safety.  Penalty on
+                    recovered by Aphrodite at OLY --8, safety.  Penalty on
                     Hephaestus : Illegal Motion (Declined)"""),
                 "safety"
                 )
