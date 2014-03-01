@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
 from data_helpers.team_list import team_codes, pfr_codes, pfr_codes_to_code
 
 
@@ -41,7 +40,7 @@ def convert_quarter(quarter_string):
         if 1 <= quarter <= 4:
             return quarter
         else:
-            raise ValueError
+            raise ValueError("Quarter value is outside the permitted range.")
 
 
 def convert_game_clock(time_string, quarter):
@@ -54,11 +53,11 @@ def convert_game_clock(time_string, quarter):
             for the second overtime, etc.
 
     returns:
-        The number of seconds since the game began as an integer. Failure
-            raises GameClockError. A blank string returns None.
+        The number of seconds since the game began as an integer. A blank
+            string returns None.
 
     raises:
-        GameClockError: If the game clock contains an invalid time format.
+        ValueError: If the game clock contains an invalid time format.
     """
     # For an empty string we return None
     if not time_string:
@@ -66,13 +65,13 @@ def convert_game_clock(time_string, quarter):
     # If it has a valid format, start parsing
     time_split = time_string.split(':')
     if time_split[0].startswith('-') or time_split[1].startswith('-'):
-        raise GameClockError("Game clock time is negative.")
+        raise ValueError("Game clock time is negative.")
     # Try to convert to ints
     try:
         minutes = int(time_split[0])
         seconds = int(time_split[1])
     except ValueError:  # Not an int!
-        raise GameClockError("Failed to convert minutes or seconds to an integer.")
+        raise ValueError("Failed to convert minutes or seconds to an integer.")
 
     # Since the time on the game clock counts down in a quarter, we need to
     # subtract the time shown from 900 seconds (1 quarter) to find the time
@@ -80,10 +79,10 @@ def convert_game_clock(time_string, quarter):
     mod_time = 900 - (minutes * 60 + seconds)
 
     if mod_time < 0:
-        raise GameClockError("Total time greater than 15:00")
+        raise ValueError("Total time greater than 15:00")
 
     if (quarter < 1):
-        raise GameClockError("Quarter less than allowed value (1)")
+        raise ValueError("Quarter less than allowed value (1)")
 
     quarter_time = 900 * (quarter - 1)
 
@@ -105,13 +104,16 @@ def convert_field_position(position_string, offense):
         input is blank.
 
     raises:
-        FieldPositionError: If the field position is invalid.
-        TeamCodeError: If the offense is not a valid team, or the field
-            position team marker is not a valid team.
+        ValueError: If the field position is invalid of the offense is not a
+            valid team.
+        KeyError: If the field position team marker is not a valid team.
     """
     # Skip if blank
     if not position_string or not offense:
         return None
+    # Check that offense is valid
+    if offense not in team_codes:
+        raise ValueError("Invalid team code.")
     # If the position string is "50", it doesn't have a team code, but we know
     # the answer is 50.
     if position_string == "50":
@@ -119,23 +121,14 @@ def convert_field_position(position_string, offense):
     # Parse the result
     position_split = position_string.split()
     pos_team_code_pfr = position_split[0]
-    if pos_team_code_pfr not in pfr_codes:
-        raise TeamCodeError("Field Position does not reference a valid team code.")
-    else:
-        pos_team_code = pfr_codes_to_code[pos_team_code_pfr]
-    # Check that the listed teams are valid
-    if offense not in team_codes:
-        raise TeamCodeError("Offense not a valid team code.")
+    pos_team_code = pfr_codes_to_code[pos_team_code_pfr]
     # Make sure we have an integer as a field position
-    try:
-        yard = int(position_split[1])
-    except ValueError:
-        raise FieldPositionError("Invalid field position.")
+    yard = int(position_split[1])
 
     if yard > 50:
-        raise FieldPositionError("Yard line greater than allowed value (50)")
+        raise ValueError("Yard line greater than allowed value (50)")
     elif yard < 1:
-        raise FieldPositionError("Yard line less than allowed value (1)")
+        raise ValueError("Yard line less than allowed value (1)")
 
     # If the offense and the position team code don't match, then we are on the
     # defense's side of the field and hence the answer is just the yard line.

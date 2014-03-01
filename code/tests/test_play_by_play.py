@@ -9,8 +9,6 @@ from raw_data_parsers.parse_play_by_play.play import get_play_type, get_scoring_
 from raw_data_parsers.parse_play_by_play.general import row_type, get_kicking_team
 from raw_data_parsers.parse_play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
 
-from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
-
 
 class TestPlayByPlay(unittest.TestCase):
 
@@ -203,12 +201,12 @@ class TestPlayByPlay(unittest.TestCase):
         self.assertEqual(convert_game_clock("15:00", 5), 3600)
         self.assertEqual(convert_game_clock("0:24", 3), 2676)
         # Failure
-        self.assertRaises(GameClockError, convert_game_clock, "16:00", 1)
-        self.assertRaises(GameClockError, convert_game_clock, "14:61", 1)
-        self.assertRaises(GameClockError, convert_game_clock, "15:01", 1)
-        self.assertRaises(GameClockError, convert_game_clock, "-10:35", 1)
-        self.assertRaises(GameClockError, convert_game_clock, "-00:35", 1)
-        self.assertRaises(GameClockError, convert_game_clock, "00:35", 0)
+        self.assertRaises(ValueError, convert_game_clock, "16:00", 1)
+        self.assertRaises(ValueError, convert_game_clock, "14:61", 1)
+        self.assertRaises(ValueError, convert_game_clock, "15:01", 1)
+        self.assertRaises(ValueError, convert_game_clock, "-10:35", 1)
+        self.assertRaises(ValueError, convert_game_clock, "-00:35", 1)
+        self.assertRaises(ValueError, convert_game_clock, "00:35", 0)
 
     def test_convert_field_position(self):
         # Successful
@@ -218,10 +216,10 @@ class TestPlayByPlay(unittest.TestCase):
         self.assertEqual(convert_field_position("", "DEN"), None)
         self.assertEqual(convert_field_position("MIN 35", ""), None)
         # Failure
-        self.assertRaises(FieldPositionError, convert_field_position, "DEN 51", "DEN")
-        self.assertRaises(FieldPositionError, convert_field_position, "DEN Inches", "DEN")
-        self.assertRaises(TeamCodeError, convert_field_position, "DEN 34", "FRN")
-        self.assertRaises(TeamCodeError, convert_field_position, "FRN 34", "DEN")
+        self.assertRaises(ValueError, convert_field_position, "DEN 51", "DEN")
+        self.assertRaises(ValueError, convert_field_position, "DEN Inches", "DEN")
+        self.assertRaises(ValueError, convert_field_position, "DEN 34", "FRN")
+        self.assertRaises(KeyError, convert_field_position, "FRN 34", "DEN")
 
     def __set_penalty_consts(self):
         """Set penalties to be used by the penalty tests."""
