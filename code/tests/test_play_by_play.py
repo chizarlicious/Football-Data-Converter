@@ -40,6 +40,7 @@ class TestPlayByPlay(unittest.TestCase):
 
     def test_get_play_type(self):
         # Successful
+        self.assertEqual(get_play_type("--"), None)
         self.assertEqual(
                 get_play_type("""Isaac Newton punts 52 yards, returned by
                     Gottfried Wilhelm von Leibniz for -7 yards (tackle by Royal
@@ -67,6 +68,11 @@ class TestPlayByPlay(unittest.TestCase):
                     by Mark Antony, recovered by Gaius Octavius and returned
                     for no gain"""),
                 "kick off"
+                )
+        self.assertEqual(
+                get_play_type("""Neville Chamberlain kicks onside, recovered by
+                    the Axis."""),
+                "onside kick"
                 )
         self.assertEqual(
                 get_play_type("""Nikolai Yezhov sacked by Joseph Stalin and

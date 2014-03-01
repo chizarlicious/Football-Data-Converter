@@ -103,6 +103,12 @@ class PlayByPlay:
 
                 # Check the type of play
                 pbp_dict["play"] = self.__set_play(cols)
+
+                # Sometimes there are blank plays
+                if pbp_dict["play"]["type"] is None:
+                    self.last_play_info = deepcopy(self.current_play_info)
+                    continue
+
                 # On a kickoff, we make sure we have the team right
                 if pbp_dict["play"]["type"] == "kick off":
                     kick_text = cols[4].get_text(' ', strip=True).replace('\n', ' ')

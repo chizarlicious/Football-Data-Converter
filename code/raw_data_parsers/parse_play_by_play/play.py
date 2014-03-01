@@ -13,6 +13,9 @@ def get_play_type(col):
             "sack",
     """
     pt = col.lower()
+    # Blank play
+    if pt == "--":
+        return None
     # Punts
     if "punt" in pt:
         return "punt"
@@ -24,8 +27,12 @@ def get_play_type(col):
             return "two point conversion with complete pass"
         else:
             return "two point conversion with run"
+    # Kick off
     elif "kicks off" in pt:
         return "kick off"
+    # Onside kick
+    elif "kicks onside" in pt:
+        return "onside kick"
     # Sacks
     elif "sack" in pt:
         return "sack"
