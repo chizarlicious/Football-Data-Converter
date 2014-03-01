@@ -15,6 +15,21 @@ pfr_codes = frozenset(
             "RAM", "TAM", "OTI", "WAS"]
         )
 
+team_names = frozenset(
+        ["AFC Probowl Team", "Arizona Cardinals", "Atlanta Falcons",
+            "Baltimore Ravens", "Buffalo Bills", "Carolina Panthers",
+            "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns",
+            "Dallas Cowboys", "Denver Broncos", "Detroit Lions",
+            "Green Bay Packers", "Houston Texans", "Indianapolis Colts",
+            "Jacksonville Jaguars", "Kansas City Chiefs", "Miami Dolphins",
+            "Minnesota Vikings", "New England Patriots", "New Orleans Saints",
+            "NFC Probowl Team", "New York Giants", "New York Jets",
+            "Oakland Raiders", "Philadelphia Eagles", "Pittsburgh Steelers",
+            "San Diego Chargers", "Seattle Seahawks", "San Francisco 49ers",
+            "Saint Louis Rams", "St. Louis Rams", "Tampa Bay Buccaneers",
+            "Tennessee Titans", "Washington Redskins"]
+        )
+
 codes_to_name = {
         "AFC": "AFC Probowl Team",
         "ARI": "Arizona Cardinals",

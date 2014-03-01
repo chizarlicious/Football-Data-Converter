@@ -8,7 +8,7 @@ from raw_data_parsers.parse_game_info import convert_time, convert_weather, conv
 from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
 from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
-from data_helpers.team_list import names_to_code
+from data_helpers.team_list import names_to_code, team_names
 
 from play_by_play import PlayByPlay
 
@@ -141,6 +141,7 @@ class Converter:
         self.strainers["def_stats"] = SoupStrainer("table", id="def_stats")
         self.strainers["off_stats"] = SoupStrainer("table", id="skill_stats")
         self.strainers["kick_stats"] = SoupStrainer("table", id="kick_stats")
+        self.strainers["all_tables"] = SoupStrainer("table")
 
     def __parse_title(self):
         """ Parse the title tag from the HTML. This sets the two teams and the
@@ -317,6 +318,35 @@ class Converter:
                         self.home_players.add(player)
                     elif team_code == self.away_team:
                         self.away_players.add(player)
+
+        # Now parse the soups from the general stats tables
+        soup = self.soups["all_tables"]
+        # The tables we are interested in have no id set, and have class =
+        # ['stats_table', 'no_highlight'].
+        team_set = None
+        for table in soup.find_all("table"):
+            if table.has_attr("class") and not table.has_attr("id") \
+            and table["class"] == ['stats_table', 'no_highlight']:
+                for metarow in table.find_all("tr"):
+                    # If it is a row with a team name, use that to set the
+                    # target set
+                    team_name = metarow.get_text(' ', strip=True).replace('\n', ' ')
+                    if team_name in team_names:
+                        team_code = names_to_code[team_name]
+                        if team_code == self.home_team:
+                            team_set = self.home_players
+                        elif team_code == self.away_team:
+                            team_set = self.away_players
+                        else:
+                            team_set = None
+                    # Otherwise we find the rows of player stats and pull out
+                    # their names.
+                    else:
+                        for body in metarow.find_all("tbody"):
+                            for row in body.find_all("tr"):
+                                cols = row.find_all("td")
+                                player = cols[0].get_text(' ', strip=True).replace('\n', ' ')
+                                team_set.add(player)
 
     def print_soups(self):
         """ Print out all the soups. """
