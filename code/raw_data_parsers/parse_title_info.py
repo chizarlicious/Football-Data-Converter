@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from time import strptime, strftime
+from datetime import datetime
 from data_helpers.team_list import names_to_code
 
 
@@ -52,5 +52,33 @@ def convert_title_date(time_string):
         time_string = time_string.replace(suffix, '')
     time_string = time_string.strip()
     # Now we convert to ISO 8601
-    time_object = strptime(time_string, "%B %d, %Y")
-    return strftime("%Y-%m-%d", time_object)
+    time_object = datetime.strptime(time_string, "%B %d, %Y")
+    return time_object.strftime("%Y-%m-%d")
+
+
+def get_season(time_string):
+    """Takes in string of the form "January 2nd, 2001" and returns the NFL
+    season year.
+
+    args:
+        time_string: A string in the form "January 2nd, 2001".
+
+    returns:
+        An int indicating the season year.
+
+    raises:
+        ValueError if the time format isn't recognized.
+    """
+    # We need to strip the suffixes from dates. For example, from 1st.
+    for suffix in ("st", "nd", "rd", "th"):
+        time_string = time_string.replace(suffix, '')
+    time_string = time_string.strip()
+    # Make a date object
+    dt_object = datetime.strptime(time_string, "%B %d, %Y")
+    year = dt_object.year
+    start = datetime(year, 6, 1)
+    end = datetime(year + 1, 3, 1)
+    if start < dt_object < end:
+        return year
+    else:
+        return year - 1
