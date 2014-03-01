@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 from raw_data_parsers.parse_play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
 from raw_data_parsers.parse_play_by_play.play import get_play_type, get_scoring_type
 from raw_data_parsers.parse_play_by_play.general import row_type, get_kicking_team
+from raw_data_parsers.parse_play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
 
 
 class PlayByPlay:
@@ -95,8 +96,7 @@ class PlayByPlay:
                 if self.is_scoring:
                     pass
                 if self.is_penalty:
-                    pass
-                    #pbp_dict["penalty"] = self.__set_penalty(cols)
+                    pbp_dict["penalty"] = self.__set_penalty()
 
                 # Set current score
                 pbp_dict["score"] = self.__set_score(cols)
@@ -237,9 +237,9 @@ class PlayByPlay:
         # TODO: How do we handle multiple tunrovers?
         pass
 
-    def __set_penalty(self, cols):
-        """ Takes a list of columns from an HTML table and sets the "penalty"
-        dictionary for the play.
+    def __set_penalty(self):
+        """ Takes the description of a play from self with a penalty in it and
+        sets the "penalty" dictionary for the play.
 
         returns:
             A penalty dictionary with the following fields:
@@ -247,11 +247,57 @@ class PlayByPlay:
                 "on": "home", "player": "Terrence Cody", "yards": -5,
                 "no play": True }
         """
+        penalties = {
+                "penalties": []
+                }
+        penalty = {
+                "declined": False,
+                "yards": None,
+                "offender": None,
+                "name": None,
+                "team": None,
+                }
         #TODO: What do we do when there are multiple penalties?
         # I think we can get the team the penalty was on by looking at the down
         # marker for the previous play and the current play. However, this
         # doesn't work if we have multiple penalties.
-        pass
+        no_play = False
+        for pen_string in split_penalties(self.current_play_info["description"]):
+            p = deepcopy(penalty)
+            # Set the name of the penalty
+            p["name"] = get_penalty_name(pen_string)
+            # Set the yardage
+            yards = get_penalty_yards(pen_string)
+            if yards:
+                p["yards"] = yards
+            # Set the offending player
+            p["offender"] = get_penalty_player(
+                    pen_string,
+                    self.game_info["home"],
+                    self.game_info["away"]
+                    )
+            # Set the team
+            p["team"] = get_penalty_team(
+                    pen_string,
+                    self.game_info["home"],
+                    self.game_info["away"],
+                    self.home_players,
+                    self.away_players
+                    )
+            # Get type info
+            p_type = get_penalty_type(pen_string)
+            if p_type == "declined":
+                p["declined"] = True
+            else:
+                p["declined"] = False
+                if p_type == "no play":
+                    no_play = True
+
+            # Fill in the full dictionary
+            penalties["penalties"].append(p)
+            penalties["no play"] = no_play
+
+        return penalties
 
     def __repr__(self):
         """ Method that returns a representation of the contents. """

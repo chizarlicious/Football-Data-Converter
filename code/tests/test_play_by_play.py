@@ -7,6 +7,7 @@ import os
 from raw_data_parsers.parse_play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
 from raw_data_parsers.parse_play_by_play.play import get_play_type, get_scoring_type
 from raw_data_parsers.parse_play_by_play.general import row_type, get_kicking_team
+from raw_data_parsers.parse_play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
 
 from errors.parsing_errors import GameClockError, FieldPositionError, TeamCodeError
 
@@ -221,6 +222,137 @@ class TestPlayByPlay(unittest.TestCase):
         self.assertRaises(FieldPositionError, convert_field_position, "DEN Inches", "DEN")
         self.assertRaises(TeamCodeError, convert_field_position, "DEN 34", "FRN")
         self.assertRaises(TeamCodeError, convert_field_position, "FRN 34", "DEN")
+
+    def __set_penalty_consts(self):
+        """Set penalties to be used by the penalty tests."""
+        # Penalties
+        self.penalties = (
+            "Mercutio accepts duel (stabbed by Tybalt). Penalty on Romeo : Getting in the way (15 yards), 15 yards",
+            "Ebenezer Scrooge avoids Christmas for no gain (tackle by Ghost of Christmas Future). Penalty on XMAS : Too many ghosts on the field, 5 yards (no play)",
+            "Ugarte killed by Captain Louis Renault. Ugarte fumbles the letters of transit (forced by Captain Louis Renault), recovered by Rick Blaine at RCA (tackle by Illsa Lund). Penalty on Major Strasser : Being a Fascist, 5 yards, Penalty on Captain Louis Renault : Taking Bribes (Declined)",
+            "I am not a penalty!"
+        )
+        # The result of running split_penalties on the penalties; also the
+        # input for further test functions
+        self.penalty_splits = (
+            ["Penalty on Romeo : Getting in the way (15 yards), 15 yards"],
+            ["Penalty on XMAS : Too many ghosts on the field, 5 yards (no play)"],
+            [
+                "Penalty on Major Strasser : Being a Fascist, 5 yards, ",
+                "Penalty on Captain Louis Renault : Taking Bribes (Declined)"
+            ],
+            []
+        )
+
+    def test_split_penalties(self):
+        self.__set_penalty_consts()
+        # Successful
+        self.assertEqual(
+                split_penalties(self.penalties[0]),
+                self.penalty_splits[0]
+                )
+        self.assertEqual(
+                split_penalties(self.penalties[1]),
+                self.penalty_splits[1]
+                )
+        self.assertEqual(
+                split_penalties(self.penalties[2]),
+                self.penalty_splits[2]
+                )
+        self.assertEqual(
+                split_penalties(self.penalties[3]),
+                self.penalty_splits[3]
+                )
+
+    def test_get_penalty_team(self):
+        self.__set_penalty_consts()
+        # Successful
+        self.assertEqual(
+                get_penalty_team(self.penalty_splits[0][0], '', '', ("Romeo"), ('')),
+                "home"
+                )
+        self.assertEqual(
+                get_penalty_team(self.penalty_splits[1][0], '', 'XMAS', (''), ('')),
+                "away"
+                )
+        self.assertEqual(
+                get_penalty_team(self.penalty_splits[2][0], '', '', ("Captain Louis Renault"), ("Major Strasser")),
+                "away"
+                )
+        self.assertEqual(
+                get_penalty_team(self.penalty_splits[2][1], '', '', ("Captain Louis Renault"), ("Major Strasser")),
+                "home"
+                )
+
+    def test_get_penalty_player(self):
+        self.__set_penalty_consts()
+        # Successful
+        self.assertEqual(
+                get_penalty_player(self.penalty_splits[0][0], '', ''),
+                "Romeo"
+                )
+        self.assertEqual(
+                get_penalty_player(self.penalty_splits[1][0], '', 'XMAS'),
+                "team"
+                )
+        self.assertEqual(
+                get_penalty_player(self.penalty_splits[2][0], '', ''),
+                "Major Strasser"
+                )
+        self.assertEqual(
+                get_penalty_player(self.penalty_splits[2][1], '', ''),
+                "Captain Louis Renault"
+                )
+
+    def test_get_penalty_yards(self):
+        self.__set_penalty_consts()
+        # Successful
+        self.assertEqual(
+                get_penalty_yards(self.penalty_splits[0][0]),
+                15
+                )
+        self.assertEqual(
+                get_penalty_yards(self.penalty_splits[1][0]),
+                5
+                )
+        self.assertEqual(
+                get_penalty_yards(self.penalty_splits[2][0]),
+                5
+                )
+        self.assertEqual(
+                get_penalty_yards(self.penalty_splits[2][1]),
+                None
+                )
+        # Failure
+        self.assertRaises(ValueError, get_penalty_yards, "Ten yards")
+
+    def test_get_penalty_type(self):
+        self.__set_penalty_consts()
+        # Successful
+        self.assertEqual(get_penalty_type(self.penalty_splits[0][0]), "accepted")
+        self.assertEqual(get_penalty_type(self.penalty_splits[1][0]), "no play")
+        self.assertEqual(get_penalty_type(self.penalty_splits[2][0]), "accepted")
+        self.assertEqual(get_penalty_type(self.penalty_splits[2][1]), "declined")
+
+    def test_get_penalty_name(self):
+        self.__set_penalty_consts()
+        # Successful
+        self.assertEqual(
+                get_penalty_name(self.penalty_splits[0][0]),
+                "Getting in the way (15 yards)"
+                )
+        self.assertEqual(
+                get_penalty_name(self.penalty_splits[1][0]),
+                "Too many ghosts on the field"
+                )
+        self.assertEqual(
+                get_penalty_name(self.penalty_splits[2][0]),
+                "Being a Fascist"
+                )
+        self.assertEqual(get_penalty_name(self.penalty_splits[2][1]),
+                "Taking Bribes"
+                )
+
 
 if __name__ == '__main__':
     unittest.main()
