@@ -108,9 +108,9 @@ class PlayByPlay:
                     kick_text = cols[4].get_text(' ', strip=True).replace('\n', ' ')
                     kick_team = get_kicking_team(kick_text)
                     if kick_team == self.game_info["home"]:
-                        self.current_play_info["offense"] = "home"
-                    else:
                         self.current_play_info["offense"] = "away"
+                    else:
+                        self.current_play_info["offense"] = "home"
 
                 # Parse state
                 pbp_dict["number"] = int(cols[5].a["name"].split('_')[1]) - 1
