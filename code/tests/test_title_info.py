@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date, get_season
+from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season
 
 
 class TestGameInfo(unittest.TestCase):

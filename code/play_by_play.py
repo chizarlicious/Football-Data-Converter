@@ -4,10 +4,10 @@ import json
 from copy import deepcopy
 from bs4 import BeautifulSoup, SoupStrainer
 
-from raw_data_parsers.parse_play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
-from raw_data_parsers.parse_play_by_play.play import get_play_type, get_scoring_type
-from raw_data_parsers.parse_play_by_play.general import row_type, get_kicking_team
-from raw_data_parsers.parse_play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
+from raw_data_parsers.play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
+from raw_data_parsers.play_by_play.play import get_play_type, get_scoring_type
+from raw_data_parsers.play_by_play.general import row_type, get_kicking_team
+from raw_data_parsers.play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
 
 
 class PlayByPlay:

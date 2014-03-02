@@ -4,9 +4,9 @@ import json
 from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
 
-from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
-from raw_data_parsers.parse_title_info import convert_title_teams, convert_title_date
-from raw_data_parsers.parse_team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
+from raw_data_parsers.game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
+from raw_data_parsers.title_info import convert_title_teams, convert_title_date
+from raw_data_parsers.team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
 from data_helpers.team_list import names_to_code, team_names
 
