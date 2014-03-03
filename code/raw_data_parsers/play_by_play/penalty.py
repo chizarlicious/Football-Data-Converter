@@ -41,7 +41,7 @@ def get_penalty_team(
     returns:
         "home" or "away"
     """
-    infractor = penalty_string.split("Penalty on ")[1].split(" :")[0]
+    infractor = penalty_string.split("Penalty on")[1].split(":")[0].strip()
     if infractor == home_team or infractor in home_players:
         return "home"
     elif infractor == away_team or infractor in away_players:
@@ -63,7 +63,7 @@ def get_penalty_player(penalty_string, home_team, away_team):
     returns:
         The name, or "team" if it is a team penalty.
     """
-    infractor = penalty_string.split("Penalty on ")[1].split(" :")[0]
+    infractor = penalty_string.split("Penalty on")[1].split(":")[0].strip()
     if infractor == home_team or infractor == away_team:
         return "team"
     else:
@@ -129,10 +129,10 @@ def get_penalty_name(penalty_string):
     returns:
         A string indicating the penalty name.
     """
-    first_split = penalty_string.split(' : ')[1]
+    first_split = penalty_string.split(':')[1].strip()
     # Most names end with a ',', but if they are declined then they end with
     # (Declined).
     if "declined" in first_split.lower():
-        return first_split.split(" (Declined)")[0]
+        return first_split.split("(Declined)")[0].strip()
     else:
-        return first_split.split(",")[0]
+        return first_split.split(",")[0].strip()

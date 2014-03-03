@@ -14,6 +14,7 @@ class TestPlayByPlay(unittest.TestCase):
             "Mercutio accepts duel (stabbed by Tybalt). Penalty on Romeo : Getting in the way (15 yards), 15 yards",
             "Ebenezer Scrooge avoids Christmas for no gain (tackle by Ghost of Christmas Future). Penalty on XMAS : Too many ghosts on the field, 5 yards (no play)",
             "Ugarte killed by Captain Louis Renault. Ugarte fumbles the letters of transit (forced by Captain Louis Renault), recovered by Rick Blaine at RCA (tackle by Illsa Lund). Penalty on Major Strasser : Being a Fascist, 5 yards, Penalty on Captain Louis Renault : Taking Bribes (Declined)",
+            "Luke Skywalker shot on Deathstar no good. Penalty on Darth Vader: Illegal Formation (Declined)",
             "I am not a penalty!"
         )
         # The result of running split_penalties on the penalties; also the
@@ -25,6 +26,7 @@ class TestPlayByPlay(unittest.TestCase):
                 "Penalty on Major Strasser : Being a Fascist, 5 yards, ",
                 "Penalty on Captain Louis Renault : Taking Bribes (Declined)"
             ],
+            ["Penalty on Darth Vader: Illegal Formation (Declined)"],
             []
         )
 
@@ -47,6 +49,10 @@ class TestPlayByPlay(unittest.TestCase):
                 split_penalties(self.penalties[3]),
                 self.penalty_splits[3]
                 )
+        self.assertEqual(
+                split_penalties(self.penalties[4]),
+                self.penalty_splits[4]
+                )
 
     def test_get_penalty_team(self):
         self.__set_penalty_consts()
@@ -65,6 +71,10 @@ class TestPlayByPlay(unittest.TestCase):
                 )
         self.assertEqual(
                 get_penalty_team(self.penalty_splits[2][1], '', '', ("Captain Louis Renault"), ("Major Strasser")),
+                "home"
+                )
+        self.assertEqual(
+                get_penalty_team(self.penalty_splits[3][0], '', '', ("Darth Vader"), ("Luke Skywalker")),
                 "home"
                 )
 
@@ -87,6 +97,10 @@ class TestPlayByPlay(unittest.TestCase):
                 get_penalty_player(self.penalty_splits[2][1], '', ''),
                 "Captain Louis Renault"
                 )
+        self.assertEqual(
+                get_penalty_player(self.penalty_splits[3][0], '', ''),
+                "Darth Vader"
+                )
 
     def test_get_penalty_yards(self):
         self.__set_penalty_consts()
@@ -107,6 +121,10 @@ class TestPlayByPlay(unittest.TestCase):
                 get_penalty_yards(self.penalty_splits[2][1]),
                 None
                 )
+        self.assertEqual(
+                get_penalty_yards(self.penalty_splits[3][0]),
+                None
+                )
         # Failure
         self.assertRaises(ValueError, get_penalty_yards, "Ten yards")
 
@@ -117,6 +135,7 @@ class TestPlayByPlay(unittest.TestCase):
         self.assertEqual(get_penalty_type(self.penalty_splits[1][0]), "no play")
         self.assertEqual(get_penalty_type(self.penalty_splits[2][0]), "accepted")
         self.assertEqual(get_penalty_type(self.penalty_splits[2][1]), "declined")
+        self.assertEqual(get_penalty_type(self.penalty_splits[3][0]), "declined")
 
     def test_get_penalty_name(self):
         self.__set_penalty_consts()
@@ -135,6 +154,9 @@ class TestPlayByPlay(unittest.TestCase):
                 )
         self.assertEqual(get_penalty_name(self.penalty_splits[2][1]),
                 "Taking Bribes"
+                )
+        self.assertEqual(get_penalty_name(self.penalty_splits[3][0]),
+                "Illegal Formation"
                 )
 
 
