@@ -4,10 +4,11 @@ import json
 from copy import deepcopy
 from bs4 import BeautifulSoup, SoupStrainer
 
-from raw_data_parsers.play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
-from raw_data_parsers.play_by_play.play import get_play_type, get_scoring_type
 from raw_data_parsers.play_by_play.general import row_type, get_kicking_team
 from raw_data_parsers.play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
+from raw_data_parsers.play_by_play.play import get_play_type, get_scoring_type
+from raw_data_parsers.play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
+from raw_data_parsers.play_by_play.turnover import split_turnovers, get_turnover_type, get_turnover_recoverer, get_turnover_committer, get_turnover_teams
 
 
 class PlayByPlay:
@@ -90,7 +91,6 @@ class PlayByPlay:
                         self.current_play_info["offense"] = "away"
                     else:
                         self.current_play_info["offense"] = "home"
-                    #pbp_dict["turnover"] = self.__set_turnover()
                 else:
                     self.current_play_info["offense"] = self.last_play_info["offense"]
                 if self.is_scoring:
@@ -121,6 +121,9 @@ class PlayByPlay:
                 # Parse state
                 pbp_dict["number"] = int(cols[5].a["name"].split('_')[1]) - 1
                 pbp_dict["state"] = self.__set_state(cols)
+                turnovers = self.__set_turnover()
+                if turnovers:
+                    pbp_dict["turnovers"] = turnovers
                 self.json.append(pbp_dict)
 
                 # Set last play info to current play info
@@ -232,16 +235,37 @@ class PlayByPlay:
 
             return play
 
-    def __set_turnover(self, cols):
-        """ Takes a list of columns from an HTML table and sets the "turnover"
-        dictionary for the play.
+    def __set_turnover(self):
+        """ Takes the description of a play from self with a turnover in it and
+        sets the "turnover" dictionary for the play.
 
         returns:
-            A turnover dictionary with the following fields:
-                "turnover": { "type": "fumble", "recovered by": "home" }
+            A turnover list with the following fields:
+                "turnovers": [{ "type": "fumble", "by": "home", "recovered":
+                "away" }, ...]
         """
-        # TODO: How do we handle multiple tunrovers?
-        pass
+        turnovers = []
+        turnover = { }
+
+        for turn_string in split_turnovers(self.current_play_info["description"]):
+            t = deepcopy(turnover)
+            # Set the name of the penalty
+            t["type"] = get_turnover_type(turn_string)
+            # Set the teams
+            (com, rec) = get_turnover_teams(
+                    turn_string,
+                    self.home_players,
+                    self.away_players
+                    )
+            if com:
+                t["by"] = com
+            if rec:
+                t["recovered"] = rec
+
+            # Fill in the full dictionary
+            turnovers.append(t)
+
+        return turnovers
 
     def __set_penalty(self):
         """ Takes the description of a play from self with a penalty in it and
@@ -301,7 +325,8 @@ class PlayByPlay:
 
             # Fill in the full dictionary
             penalties["penalties"].append(p)
-            penalties["no play"] = no_play
+
+        penalties["no play"] = no_play
 
         return penalties
 
