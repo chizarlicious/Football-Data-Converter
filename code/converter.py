@@ -5,10 +5,11 @@ from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
 
 from raw_data_parsers.game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
-from raw_data_parsers.title_info import convert_title_teams, convert_title_date
+from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season
 from raw_data_parsers.team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
 from data_helpers.team_list import names_to_code, team_names
+from data_helpers.rosters import rosters
 
 from play_by_play import PlayByPlay
 
@@ -27,6 +28,7 @@ class Converter:
         self.away_team = None
         self.home_players = set([])
         self.away_players = set([])
+        self.season = None
 
         # Initialize the dictionary to convert to JSON
         self.__init_json()
@@ -49,9 +51,10 @@ class Converter:
         self.__parse_officials()
         self.__parse_game_info()
         self.__parse_team_stats()
-        self.__parse_starter()
 
         # Parse all players onto teams, the starter list isn't enough
+        self.__add_rosters()
+        self.__parse_starter()
         self.__get_all_players()
 
         # Parse Play-by-play
@@ -158,6 +161,7 @@ class Converter:
         self.away_team = away
         # Parse time
         self.json["datetime"]["date"] = convert_title_date(fulldate)
+        self.season = get_season(fulldate)
 
     def __parse_officials(self):
         """ Set up the officials dictionary and add it to self.json """
@@ -347,6 +351,15 @@ class Converter:
                                 cols = row.find_all("td")
                                 player = cols[0].get_text(' ', strip=True).replace('\n', ' ')
                                 team_set.add(player)
+
+    def __add_rosters(self):
+        """Add the roster information to our player list"""
+        # We add all players on the team from the pre-made list of players.
+        # NOTE: Sometimes there are degenerate players, either because they
+        # have the same name of one player played for both teams during the
+        # season. TODO: Find an acceptable solution to this case.
+        self.home_players = rosters[self.home_team][self.season].copy()
+        self.away_players = rosters[self.away_team][self.season].copy()
 
     def print_soups(self):
         """ Print out all the soups. """
