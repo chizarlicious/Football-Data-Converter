@@ -280,20 +280,13 @@ class PlayByPlay:
         penalties = {
                 "penalties": []
                 }
-        penalty = {
-                "declined": False,
-                "yards": None,
-                "offender": None,
-                "name": None,
-                "team": None,
-                }
         #TODO: What do we do when there are multiple penalties?
         # I think we can get the team the penalty was on by looking at the down
         # marker for the previous play and the current play. However, this
         # doesn't work if we have multiple penalties.
         no_play = False
         for pen_string in split_penalties(self.current_play_info["description"]):
-            p = deepcopy(penalty)
+            p = {}
             # Set the name of the penalty
             p["name"] = get_penalty_name(pen_string)
             # Set the yardage
@@ -317,9 +310,9 @@ class PlayByPlay:
             # Get type info
             p_type = get_penalty_type(pen_string)
             if p_type == "declined":
-                p["declined"] = True
+                p["accepted"] = False
             else:
-                p["declined"] = False
+                p["accepted"] = True
                 if p_type == "no play":
                     no_play = True
 
