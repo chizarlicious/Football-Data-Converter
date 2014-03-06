@@ -155,7 +155,9 @@ class PlayByPlay:
         state = {}
 
         # Down
-        state["down"] = convert_int(cols[2].get_text(strip=True))
+        down = convert_int(cols[2].get_text(strip=True))
+        if down is not None:
+            state["down"] = down
 
         # Quarter (Used to set the time, also set in the __parse_play())
         if self.current_play_info["quarter"] < 5:
@@ -174,14 +176,18 @@ class PlayByPlay:
         state["time"] = time
 
         # Yards to go
-        state["yards to first down"] = convert_int(cols[3].get_text(strip=True))
+        ytfd = convert_int(cols[3].get_text(strip=True))
+        if ytfd is not None:
+            state["yards to first down"] = ytfd
 
         # Offense
         state["offense"] = self.current_play_info["offense"]
 
         # Yards to goal
         team_code = self.game_info[state["offense"]]
-        state["yards to goal"] = convert_field_position(cols[4].get_text(strip=True), team_code)
+        ytg = convert_field_position(cols[4].get_text(strip=True), team_code)
+        if ytg is not None:
+            state["yards to goal"] = ytg
 
         return state
 

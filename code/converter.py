@@ -70,62 +70,25 @@ class Converter:
     def __init_json(self):
         """ Initialize the dictionary for the output JSON. """
         self.json = {
-                "home team": None,
-                "away team": None,
-                "venue": None,
-                "datetime": None,
-                "weather": None,
-                "betting": None,
-                "officials": None,
                 "team stats": {},
                 "plays": []
                 }
         self.json["venue"] = {
-                "stadium": None,
-                "dome": None,
-                "surface": None,
-                "attendance": None
                 }
         self.json["datetime"] = {
-                "date": None,
-                "start time": None,
-                "duration": None
                 }
         self.json["betting"] = {
-                "winner": None,
-                "speard": None,
-                "over under": None
                 }
         self.json["players"] = {
                 "home": {},
                 "away": {}
                 }
         teamstats = {
-                "first downs": None,
-                "rush": {
-                    "plays": None,
-                    "yards": None,
-                    "touchdowns": None,
-                    },
-                "pass": {
-                    "plays": None,
-                    "yards": None,
-                    "touchdowns": None,
-                    "successful": None,
-                    "interceptions": None
-                    },
-                "sacks": {
-                    "plays": None,
-                    "yards": None
-                    },
-                "fumbles": {
-                    "plays": None,
-                    "lost": None
-                    },
-                "penalties": {
-                    "plays": None,
-                    "yards": None
-                    }
+                "rush": {},
+                "pass": {},
+                "sacks": {},
+                "fumbles": {},
+                "penalties": {}
                 }
         # We use deep copy so that we can uniquely set values in each, instead
         # of having them linked.
