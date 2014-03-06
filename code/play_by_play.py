@@ -308,6 +308,7 @@ class PlayByPlay:
             # Set the team
             p["team"] = get_penalty_team(
                     pen_string,
+                    self.current_play_info["offense"],
                     self.game_info["home"],
                     self.game_info["away"],
                     self.home_players,
