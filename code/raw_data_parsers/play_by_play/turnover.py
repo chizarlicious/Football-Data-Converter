@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import re
+
 from data_helpers.team_list import pfr_codes_to_code, pfr_codes
 
 
@@ -16,7 +18,9 @@ def split_turnovers(col):
     # Either the turnover is alone, or is set off in its own sentence, so we
     # split on '.'
     final_list = []
-    for item in col.split('.'):
+    # Split on several different substring
+    regex = " yards\.| yard\.| gain\.|\)\.| safety\.| touchdown\."
+    for item in re.split(regex, col):
         if "fumble" in item.lower() or "intercepted" in item.lower():
             final_list.append(item.strip())
 
@@ -52,11 +56,16 @@ def get_turnover_recoverer(turnover_string):
             split_turnovers.
 
     returns:
-        A string indicating the player's name.
+        A string indicating the player's name, or False if the ball was
+            not recovered.
     """
     # Use the type to set the string to split on
     to_type = get_turnover_type(turnover_string)
     if to_type == "fumble":
+        # Check to see if the fumble is recovered (some are fumbled out of
+        # bounds for instance)
+        if "recovered" not in turnover_string:
+            return False
         split_string = "recovered by"
     elif to_type == "interception":
         split_string = "intercepted by"
@@ -104,7 +113,9 @@ def get_turnover_teams(turnover_string, home_players, away_players):
 
     returns:
         A tuple of (committing_team, recovering_team) with values "home",
-            "away"
+            "away". False is used for the recovering team if there is no
+            recovering team (for example, when the ball is fumbled out the end
+            zone for a safety).
     """
     com = get_turnover_committer(turnover_string)
     rec = get_turnover_recoverer(turnover_string)
@@ -130,15 +141,21 @@ def get_turnover_teams(turnover_string, home_players, away_players):
         elif com_uniq_away:
             com_team = "away"
         else:
-            error_text += "\tTurnover committing player '" + com + "' not recognized!"
+            error_text += "\tTurnover committing player '"
+            error_text += str(com) + "' not recognized!"
 
-        rec_team = None
-        if rec_uniq_home:
-            rec_team = "home"
-        elif rec_uniq_away:
-            rec_team = "away"
+        # False is used to indicate that there is no recovering player
+        if rec is not False:
+            rec_team = None
+            if rec_uniq_home:
+                rec_team = "home"
+            elif rec_uniq_away:
+                rec_team = "away"
+            else:
+                error_text += "\tTurnover recovering player '"
+                error_text += str(rec) + "' not recognized!"
         else:
-            error_text += "\tTurnover recovering player '" + pre + "' not recognized!"
+            rec_team = False
 
         if error_text:
             print(error_text)
