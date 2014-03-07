@@ -20,13 +20,15 @@ def split_turnovers(col):
     final_list = []
     # Split on several different substring
     reg_list = (
-            "\)\.",
-            " yards\.", 
-            " yard\.", 
-            " gain\.",
-            " safety\.",
-            #" intended for (\b\W\b)*\."
-            " \. "
+            "\)\.",       # ').'
+            " yards\.",   # ' yards.'
+            " yard\.",    # ' yard.'
+            " gain\.",    # ' gain.'
+            " safety\.",  # ' safety.'
+            # Starting at 'intended for', match any word consisting of A
+            # through Z (ignoring case) `or a period until ' .'.
+            # This is used for QB fumbles
+            "intended for( [a-zA-Z.]+)* \."
             )
     regex = "|".join(reg_list)
     for item in re.split(regex, col):

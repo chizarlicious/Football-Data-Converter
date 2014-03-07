@@ -26,7 +26,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             # Fumble that is not recovered
             "Men Without Hats runs for 10 yards. Men Without Hats fumbles, safety",
             # QB Fumble
-            "Jackson Browne pass incomplete short right intended for David Perry Lindley . Jackson Browne fumbles, recovered by Jackson Browne at SEA -14",
+            "C. J. Browne pass incomplete short right intended for D. P. Lindley . C. J. Browne fumbles, recovered by C. J. Browne at SEA -14",
             # Not a turnover
             "Sisyphus up the middle for no gain."
         )
@@ -43,7 +43,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             ],
             ["R. P. Feynman fumbles, recovered by E. Fermi at LAL -20 (tackle by E. Lawrence)"],
             ["Men Without Hats fumbles, safety"],
-            ["Jackson Browne fumbles, recovered by Jackson Browne at SEA -14"],
+            ["C. J. Browne fumbles, recovered by C. J. Browne at SEA -14"],
             []
         )
 
@@ -164,7 +164,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[7][0]),
-                "Jackson Browne"
+                "C. J. Browne"
                 )
 
     def test_get_turnover_committer(self):
@@ -204,7 +204,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[7][0]),
-                "Jackson Browne"
+                "C. J. Browne"
                 )
 
     def test_get_turnover_teams(self):
@@ -277,7 +277,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.assertEqual(
                 get_turnover_teams(
                     self.turnover_splits[7][0],
-                    ("Jackson Browne", "David Perry Lindley"),
+                    ("C. J. Browne", "D. P. Lindley"),
                     ('',),
                     ),
                 ("home", "home")
