@@ -26,7 +26,7 @@ def split_turnovers(col):
             " gain\.",    # ' gain.'
             " safety\.",  # ' safety.'
             # Starting at 'intended for', match any word consisting of A
-            # through Z (ignoring case) `or a period until ' .'.
+            # through Z (ignoring case) or a period until ' .'.
             # This is used for QB fumbles
             "intended for( [a-zA-Z.]+)* \."
             )
