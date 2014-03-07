@@ -19,10 +19,20 @@ def split_turnovers(col):
     # split on '.'
     final_list = []
     # Split on several different substring
-    regex = " yards\.| yard\.| gain\.|\)\.| safety\.| touchdown\."
+    reg_list = (
+            "\)\.",
+            " yards\.", 
+            " yard\.", 
+            " gain\.",
+            " safety\.",
+            #" intended for (\b\W\b)*\."
+            " \. "
+            )
+    regex = "|".join(reg_list)
     for item in re.split(regex, col):
-        if "fumble" in item.lower() or "intercepted" in item.lower():
-            final_list.append(item.strip())
+        if item is not None:
+            if "fumble" in item.lower() or "intercepted" in item.lower():
+                final_list.append(item.strip())
 
     return final_list
 

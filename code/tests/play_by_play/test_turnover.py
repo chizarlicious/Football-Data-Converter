@@ -25,6 +25,8 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             "J.R. Oppenheimer says 'Now I am become death, the destroyer of worlds.' for no gain. R. P. Feynman fumbles, recovered by E. Fermi at LAL -20 (tackle by E. Lawrence)",
             # Fumble that is not recovered
             "Men Without Hats runs for 10 yards. Men Without Hats fumbles, safety",
+            # QB Fumble
+            "Jackson Browne pass incomplete short right intended for David Perry Lindley . Jackson Browne fumbles, recovered by Jackson Browne at SEA -14",
             # Not a turnover
             "Sisyphus up the middle for no gain."
         )
@@ -41,6 +43,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             ],
             ["R. P. Feynman fumbles, recovered by E. Fermi at LAL -20 (tackle by E. Lawrence)"],
             ["Men Without Hats fumbles, safety"],
+            ["Jackson Browne fumbles, recovered by Jackson Browne at SEA -14"],
             []
         )
 
@@ -79,6 +82,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 split_turnovers(self.turnovers[7]),
                 self.turnover_splits[7]
                 )
+        self.assertEqual(
+                split_turnovers(self.turnovers[8]),
+                self.turnover_splits[8]
+                )
 
     def test_get_turnover_type(self):
         self.__set_turnover_consts()
@@ -113,6 +120,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_type(self.turnover_splits[6][0]),
+                "fumble"
+                )
+        self.assertEqual(
+                get_turnover_type(self.turnover_splits[7][0]),
                 "fumble"
                 )
 
@@ -151,6 +162,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 get_turnover_recoverer(self.turnover_splits[6][0]),
                 False
                 )
+        self.assertEqual(
+                get_turnover_recoverer(self.turnover_splits[7][0]),
+                "Jackson Browne"
+                )
 
     def test_get_turnover_committer(self):
         self.__set_turnover_consts()
@@ -186,6 +201,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[6][0]),
                 "Men Without Hats"
+                )
+        self.assertEqual(
+                get_turnover_committer(self.turnover_splits[7][0]),
+                "Jackson Browne"
                 )
 
     def test_get_turnover_teams(self):
@@ -254,6 +273,14 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                     ("Ivan Doroschuk",),
                     ),
                 ("home", False)
+                )
+        self.assertEqual(
+                get_turnover_teams(
+                    self.turnover_splits[7][0],
+                    ("Jackson Browne", "David Perry Lindley"),
+                    ('',),
+                    ),
+                ("home", "home")
                 )
 
 
