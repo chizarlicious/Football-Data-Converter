@@ -15,6 +15,8 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             "Josiah Barlet for no gain. Josiah Barlet fumbles, recovered by Matt Santos at PLC -30 (tackle by Leo McGarry)",
             # Interception returned for a touchdonw
             "Tom Petty pass incomplete short right intended for Roy Orbison is intercepted by Bob Dylan at PLC -39 and returned for 39 yards, touchdown",
+            # Interception without intended target for a touchdonw
+            "Clyde Barrow pass incomplete is intercepted by Frank Harmer at BPL -10 (tackled by Bonnie Parker ).",
             # Forced fumble with tackle afterwards
             "Ugarte killed by Captain Louis Renault for no gain. Ugarte fumbles the letters of transit (forced by Captain Louis Renault), recovered by Rick Blaine at RCA (tackle by Illsa Lund). Penalty on Major Strasser : Being a Fascist, 5 yards, Penalty on Captain Louis Renault : Taking Bribes (Declined)",
             # Unforced fumble for a safety, penalty declined
@@ -35,6 +37,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.turnover_splits = (
             ["Josiah Barlet fumbles, recovered by Matt Santos at PLC -30 (tackle by Leo McGarry)"],
             ["Tom Petty pass incomplete short right intended for Roy Orbison is intercepted by Bob Dylan at PLC -39 and returned for 39 yards, touchdown"],
+            ["Clyde Barrow pass incomplete is intercepted by Frank Harmer at BPL -10 (tackled by Bonnie Parker"],
             ["Ugarte fumbles the letters of transit (forced by Captain Louis Renault), recovered by Rick Blaine at RCA (tackle by Illsa Lund"],
             ["James Moriarty fumbles, recovered by Sherlock Holmes at BBF --8,"],
             [
@@ -86,6 +89,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 split_turnovers(self.turnovers[8]),
                 self.turnover_splits[8]
                 )
+        self.assertEqual(
+                split_turnovers(self.turnovers[9]),
+                self.turnover_splits[9]
+                )
 
     def test_get_turnover_type(self):
         self.__set_turnover_consts()
@@ -100,7 +107,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_type(self.turnover_splits[2][0]),
-                "fumble"
+                "interception"
                 )
         self.assertEqual(
                 get_turnover_type(self.turnover_splits[3][0]),
@@ -108,14 +115,14 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_type(self.turnover_splits[4][0]),
-                "interception"
-                )
-        self.assertEqual(
-                get_turnover_type(self.turnover_splits[4][1]),
                 "fumble"
                 )
         self.assertEqual(
                 get_turnover_type(self.turnover_splits[5][0]),
+                "interception"
+                )
+        self.assertEqual(
+                get_turnover_type(self.turnover_splits[5][1]),
                 "fumble"
                 )
         self.assertEqual(
@@ -124,6 +131,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_type(self.turnover_splits[7][0]),
+                "fumble"
+                )
+        self.assertEqual(
+                get_turnover_type(self.turnover_splits[8][0]),
                 "fumble"
                 )
 
@@ -140,30 +151,34 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[2][0]),
-                "Rick Blaine"
+                "Frank Harmer"
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[3][0]),
-                "Sherlock Holmes"
+                "Rick Blaine"
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[4][0]),
-                "Stellan Skarsgård"
-                )
-        self.assertEqual(
-                get_turnover_recoverer(self.turnover_splits[4][1]),
-                "Sean Bean"
+                "Sherlock Holmes"
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[5][0]),
-                "E. Fermi"
+                "Stellan Skarsgård"
+                )
+        self.assertEqual(
+                get_turnover_recoverer(self.turnover_splits[5][1]),
+                "Sean Bean"
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[6][0]),
-                False
+                "E. Fermi"
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[7][0]),
+                False
+                )
+        self.assertEqual(
+                get_turnover_recoverer(self.turnover_splits[8][0]),
                 "C. J. Browne"
                 )
 
@@ -180,30 +195,34 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[2][0]),
-                "Ugarte"
+                "Clyde Barrow"
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[3][0]),
-                "James Moriarty"
+                "Ugarte"
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[4][0]),
-                "Robert De Niro"
-                )
-        self.assertEqual(
-                get_turnover_committer(self.turnover_splits[4][1]),
-                "Stellan Skarsgård"
+                "James Moriarty"
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[5][0]),
-                "R. P. Feynman"
+                "Robert De Niro"
+                )
+        self.assertEqual(
+                get_turnover_committer(self.turnover_splits[5][1]),
+                "Stellan Skarsgård"
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[6][0]),
-                "Men Without Hats"
+                "R. P. Feynman"
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[7][0]),
+                "Men Without Hats"
+                )
+        self.assertEqual(
+                get_turnover_committer(self.turnover_splits[8][0]),
                 "C. J. Browne"
                 )
 
@@ -229,6 +248,14 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.assertEqual(
                 get_turnover_teams(
                     self.turnover_splits[2][0],
+                    ("Clyde Barrow", "Bonnie Parker"),
+                    ("Frank Harmer",),
+                    ),
+                ("home", "away")
+                )
+        self.assertEqual(
+                get_turnover_teams(
+                    self.turnover_splits[3][0],
                     ("Ugarte", "Rick Blaine"),
                     ("Captain Louis Renault", "Major Strasser"),
                     ),
@@ -236,7 +263,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_teams(
-                    self.turnover_splits[3][0],
+                    self.turnover_splits[4][0],
                     ("James Moriarty",),
                     ("Sherlock Holmes",),
                     ),
@@ -244,7 +271,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_teams(
-                    self.turnover_splits[4][0],
+                    self.turnover_splits[5][0],
                     ("Robert De Niro", "Jean Reno", "Sean Bean"),
                     ("Stellan Skarsgård",),
                     ),
@@ -252,7 +279,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_teams(
-                    self.turnover_splits[4][1],
+                    self.turnover_splits[5][1],
                     ("Robert De Niro", "Jean Reno", "Sean Bean"),
                     ("Stellan Skarsgård",),
                     ),
@@ -260,7 +287,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_teams(
-                    self.turnover_splits[5][0],
+                    self.turnover_splits[6][0],
                     ("J.R. Oppenheimer", "R. P. Feynman"),
                     ("E. Fermi",),
                     ),
@@ -268,7 +295,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_teams(
-                    self.turnover_splits[6][0],
+                    self.turnover_splits[7][0],
                     ("Men Without Hats",),
                     ("Ivan Doroschuk",),
                     ),
@@ -276,7 +303,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_teams(
-                    self.turnover_splits[7][0],
+                    self.turnover_splits[8][0],
                     ("C. J. Browne", "D. P. Lindley"),
                     ('',),
                     ),
