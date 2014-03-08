@@ -13,9 +13,6 @@ def get_play_type(col):
             "sack",
     """
     pt = col.lower()
-    # Blank play
-    if pt == "--":
-        return None
     # Punts
     if "punt" in pt:
         return "punt"
@@ -57,14 +54,19 @@ def get_play_type(col):
     elif "spiked" in pt:
         return "spike"
     # Penalty before snap
-    elif pt.split()[0] == "penalty":
+    elif pt.startswith("penalty"):
         return "penalty"
+    # Aborted snap
+    elif "aborted snap" in pt:
+        return "aborted snap"
     # Run
     elif "for" in pt and ("yard" in pt or "no gain" in pt):
         return "run"
     # Unmatched!!!!
     else:
-        print("Unmatched play type!", pt)
+        #raise ValueError("Unmatched play type!", pt)
+        out = "\tUnmatched play type! '" + pt + "'"
+        print(out)
         return None
 
 
@@ -97,5 +99,7 @@ def get_scoring_type(col):
         return "field goal"
     else:
     # Unmatched!!!!
-        print("Unmatched Score type!", pt)
+        #raise ValueError("Unmatched Score type!", pt)
+        out = "\tUnmatched Score type! '" + pt + "'"
+        print(out)
         return None

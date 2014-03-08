@@ -82,6 +82,10 @@ class TestPlayByPlay(unittest.TestCase):
                 "spike"
                 )
         self.assertEqual(
+                get_play_type("Aborted snap. G. Khan fumbles, recovered by K. Tolui at EUR -23 (tackled by Ögödei Kahn )."),
+                "aborted snap"
+                )
+        self.assertEqual(
                 get_play_type("""Isaac Asimov up the middle for 11 yards
                     (tackle by Ray Bradbury)"""),
                 "run"
