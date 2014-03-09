@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
 
 from raw_data_parsers.game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
-from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season
+from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season, get_output_date
 from raw_data_parsers.team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
 
 from data_helpers.team_list import names_to_code, team_names
@@ -29,6 +29,7 @@ class Converter:
         self.home_players = set([])
         self.away_players = set([])
         self.season = None
+        self.output_date = None
 
         # Initialize the dictionary to convert to JSON
         self.__init_json()
@@ -125,6 +126,7 @@ class Converter:
         # Parse time
         self.json["datetime"]["date"] = convert_title_date(fulldate)
         self.season = get_season(fulldate)
+        self.output_date = get_output_date(fulldate)
 
     def __parse_officials(self):
         """ Set up the officials dictionary and add it to self.json """
@@ -349,8 +351,20 @@ if __name__ == '__main__':
     args = argparser.parse_args()
 
     for raw_file in args.file:
-        converter = Converter(raw_file)
-        #print(converter)
-        print(json.dumps(converter.json, sort_keys=True, indent=2, separators=(',', ': ')))
-
-        #converter.print_soups()
+        try:
+            converter = Converter(raw_file)
+        except:
+            continue
+        else:
+            out_file_name = "../data/reco/{season}/{season}_{date}_{away}_at_{home}.json".format(
+                    season = converter.season,
+                    date = converter.output_date,
+                    away = converter.away_team,
+                    home = converter.home_team
+                )
+            with open(out_file_name, "w") as out_file:
+                #json.dumps(converter.json, out_file, sort_keys=True, indent=2, separators=(',', ': '), ensure_ascii=False)
+                data = json.dumps(converter.json, sort_keys=True, indent=2, separators=(',', ': '))
+                out_file.write(data)
+                out_file.close()
+            #print(json.dumps(converter.json, sort_keys=True, indent=2, separators=(',', ': ')))

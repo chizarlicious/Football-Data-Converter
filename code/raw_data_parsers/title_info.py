@@ -42,7 +42,7 @@ def convert_title_date(time_string):
         time_string: A string in the form "January 2nd, 2001".
 
     returns:
-        A string of the date in ISO 8601 format ("%B %d, %Y").
+        A string of the date in ISO 8601 format "%Y-%m-%d".
 
     raises:
         ValueError if the time format isn't recognized.
@@ -82,3 +82,21 @@ def get_season(time_string):
         return year
     else:
         return year - 1
+
+
+def get_output_date(time_string):
+    """Takes in string of the form "January 2nd, 2001" and returns the date in
+    the form "%Y%m%d".
+
+    args:
+        time_string: A string in the form "January 2nd, 2001".
+
+    returns:
+        A string of the date in ISO 8601 format "%Y%m%d"
+
+    raises:
+        ValueError if the time format isn't recognized.
+    """
+    iso_date = convert_title_date(time_string)
+    time_object = datetime.strptime(iso_date, "%Y-%m-%d")
+    return time_object.strftime("%Y%m%d")

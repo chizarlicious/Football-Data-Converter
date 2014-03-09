@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season
+from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season, get_output_date
 
 
 class TestGameInfo(unittest.TestCase):
@@ -46,6 +46,20 @@ class TestGameInfo(unittest.TestCase):
         # Failure
         self.assertRaises(
                 ValueError, get_season, "February 45th, 2001"
+                )
+
+    def test_get_output_date(self):
+        # Successful
+        self.assertEqual(get_output_date("January 2nd, 2012"), "20120102")
+        # Failure
+        self.assertRaises(
+                ValueError, get_output_date, "February 45th, 2001"
+                )
+        self.assertRaises(
+                ValueError, get_output_date, "Notober 21nd, 2012"
+                )
+        self.assertRaises(
+                ValueError, get_output_date, "October 21teen, 2012"
                 )
 
 if __name__ == '__main__':
