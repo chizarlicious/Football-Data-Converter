@@ -115,7 +115,7 @@ class PlayByPlay:
                     continue
 
                 # On a kickoff, we make sure we have the team right
-                if pbp_dict["play"]["type"] == "kick off":
+                if pbp_dict["play"]["type"] in {"kick off", "onside kick"}:
                     kick_text = cols[4].get_text(' ', strip=True).replace('\n', ' ')
                     kick_team = get_kicking_team(kick_text)
                     if kick_team == self.home:
@@ -148,8 +148,8 @@ class PlayByPlay:
         self.is_penalty = ("has_penalty" in row_class)
         # In some years the raw data considers the kicking team as the offense;
         # we correct for that here.
-        if self.season in self.opposite_years \
-        and self.last_play_info["type"] == "kick off":
+        if self.season in self.kick_offense_years \
+        and self.last_play_info["type"] in {"kick off", "onside kick"}:
             # The 'not' is required because if a kick off results in a turn
             # over, the "pos_change" flag isn't set, as the kicking team still
             # has the ball (and was considered the offense).
