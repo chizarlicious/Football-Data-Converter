@@ -61,6 +61,7 @@ class Converter:
         # Parse Play-by-play
         self.pbp = PlayByPlay(
                 self.soups["pbp_data"],
+                self.season,
                 self.home_team,
                 self.away_team,
                 self.home_players,

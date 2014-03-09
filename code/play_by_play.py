@@ -13,7 +13,7 @@ from raw_data_parsers.play_by_play.turnover import split_turnovers, get_turnover
 
 class PlayByPlay:
 
-    def __init__(self, soup, home_team, away_team, home_players, away_players):
+    def __init__(self, soup, season, home_team, away_team, home_players, away_players):
         """Given a BeautifulSoup, parses the play-by-play data.
 
         args:
@@ -21,17 +21,21 @@ class PlayByPlay:
         """
         # Save input variables
         self.soup = soup
+        self.season = int(season)
+        self.home = home_team
+        self.away = away_team
         self.home_players = frozenset(home_players)
         self.away_players = frozenset(away_players)
-        # Initialize the dictionary to convert to JSON
-        self.json = []  # Used to store plays
+        # Initialize the list to convert to JSON
+        self.json = []
         self.last_play_info = {
                 "time": 0,
                 "quarter": 1,
                 "offense": None,
                 "home score": 0,
                 "away score": 0,
-                "description": ''
+                "description": '',
+                "type": None
                 }
         self.current_play_info = {
                 "time": 0,
@@ -39,15 +43,17 @@ class PlayByPlay:
                 "offense": None,
                 "home score": 0,
                 "away score": 0,
-                "description": ''
-                }
-        self.game_info = {
-                "home": home_team,
-                "away": away_team
+                "description": '',
+                "type": None
                 }
         self.is_pchange = False
         self.is_scoring = False
         self.is_penalty = False
+
+        # Some years consider the possessing team on a kick off to be the
+        # kicking team; this means that they set the "pos_change" flag in the
+        # opposite manner as compared to all other years.
+        self.kick_offense_years = {1999, 2013}
 
         # Parse the plays
         self.__parse_play()
@@ -84,6 +90,7 @@ class PlayByPlay:
                 self.current_play_info["description"] = description
 
                 # Assign offense
+                # We correct the 1999, 2013 kick offs when setting is_pchange
                 if self.is_pchange:
                     # For change of possession, we change the team with the
                     # ball
@@ -93,8 +100,6 @@ class PlayByPlay:
                         self.current_play_info["offense"] = "home"
                 else:
                     self.current_play_info["offense"] = self.last_play_info["offense"]
-                if self.is_scoring:
-                    pass
                 if self.is_penalty:
                     pbp_dict["penalty"] = self.__set_penalty()
 
@@ -113,7 +118,7 @@ class PlayByPlay:
                 if pbp_dict["play"]["type"] == "kick off":
                     kick_text = cols[4].get_text(' ', strip=True).replace('\n', ' ')
                     kick_team = get_kicking_team(kick_text)
-                    if kick_team == self.game_info["home"]:
+                    if kick_team == self.home:
                         self.current_play_info["offense"] = "away"
                     else:
                         self.current_play_info["offense"] = "home"
@@ -141,7 +146,16 @@ class PlayByPlay:
         row_class = row["class"]
         self.is_scoring = ("is_scoring" in row_class)
         self.is_penalty = ("has_penalty" in row_class)
-        self.is_pchange = ("pos_change" in row_class)
+        # In some years the raw data considers the kicking team as the offense;
+        # we correct for that here.
+        if self.season in self.opposite_years \
+        and self.last_play_info["type"] == "kick off":
+            # The 'not' is required because if a kick off results in a turn
+            # over, the "pos_change" flag isn't set, as the kicking team still
+            # has the ball (and was considered the offense).
+            self.is_pchange = not ("pos_change" in row_class)
+        else:
+            self.is_pchange = ("pos_change" in row_class)
 
     def __set_state(self, cols):
         """ Takes a list of columns from an HTML table and sets the "state"
@@ -184,7 +198,11 @@ class PlayByPlay:
         state["offense"] = self.current_play_info["offense"]
 
         # Yards to goal
-        team_code = self.game_info[state["offense"]]
+        offense = state["offense"]
+        if offense == "home":
+            team_code = self.home
+        else:
+            team_code = self.away
         ytg = convert_field_position(cols[4].get_text(strip=True), team_code)
         if ytg is not None:
             state["yards to goal"] = ytg
@@ -223,6 +241,7 @@ class PlayByPlay:
 
         # Set the type
         play["type"] = get_play_type(self.current_play_info["description"])
+        self.current_play_info["type"] = play["type"]
 
         if not self.is_scoring:
             return play
@@ -251,7 +270,7 @@ class PlayByPlay:
                 "away" }, ...]
         """
         turnovers = []
-        turnover = { }
+        turnover = {}
 
         for turn_string in split_turnovers(self.current_play_info["description"]):
             t = deepcopy(turnover)
@@ -302,15 +321,15 @@ class PlayByPlay:
             # Set the offending player
             p["offender"] = get_penalty_player(
                     pen_string,
-                    self.game_info["home"],
-                    self.game_info["away"]
+                    self.home,
+                    self.away
                     )
             # Set the team
             p["team"] = get_penalty_team(
                     pen_string,
                     self.current_play_info["offense"],
-                    self.game_info["home"],
-                    self.game_info["away"],
+                    self.home,
+                    self.away,
                     self.home_players,
                     self.away_players
                     )
