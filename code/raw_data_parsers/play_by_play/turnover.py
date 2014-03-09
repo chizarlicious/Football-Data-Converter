@@ -35,7 +35,9 @@ def split_turnovers(col):
     regex = "|".join(reg_list)
     for item in re.split(regex, col):
         if item is not None:
-            if "fumble" in item.lower() or "intercepted" in item.lower():
+            if "fumble" in item.lower() \
+            or "intercepted" in item.lower() \
+            or "muffed" in item.lower():
                 final_list.append(item.strip())
 
     return final_list
@@ -55,6 +57,8 @@ def get_turnover_type(turnover_string):
         return "fumble"
     elif "intercept" in turnover_string.lower():
         return "interception"
+    elif "muffed" in turnover_string.lower():
+        return "muffed catch"
     else:
         out = "Unknown turnover type: '" + turnover_string + "'"
         print(out)
@@ -80,14 +84,19 @@ def get_turnover_recoverer(turnover_string):
         # bounds for instance)
         if "recovered" not in turnover_string:
             return False
-        split_string = "recovered by"
+        r_split_string = "recovered by"
+        l_split_string = " at "
     elif to_type == "interception":
-        split_string = "intercepted by"
+        r_split_string = "intercepted by"
+        l_split_string = " at "
+    elif to_type == "muffed catch":
+        r_split_string = "recovered by"
+        l_split_string = " and "
     else:  # Unknown case, we can't do anything
         return None
     # Now split the string
-    r_string = turnover_string.split(split_string)[1].strip()
-    l_string = r_string.split(" at ")[0].strip()
+    r_string = turnover_string.split(r_split_string)[1].strip()
+    l_string = r_string.split(l_split_string)[0].strip()
     return l_string
 
 
@@ -104,15 +113,23 @@ def get_turnover_committer(turnover_string):
     """
     # Use the type to set the string to split on
     to_type = get_turnover_type(turnover_string)
+    r_split_string = None
     if to_type == "fumble":
-        split_string = "fumbles"
+        l_split_string = "fumbles"
     elif to_type == "interception":
-        split_string = "pass incomplete"
+        l_split_string = "pass incomplete"
+    elif to_type == "muffed catch":
+        l_split_string = ", recovered by"
+        r_split_string = "muffed catch by"
     else:  # Unknown case, we can't do anything
         return None
     # Now split the string
-    l_string = turnover_string.split(split_string)[0].strip()
-    return l_string
+    l_string = turnover_string.split(l_split_string)[0].strip()
+    if r_split_string:
+        r_string = l_string.split(r_split_string)[1].strip()
+        return r_string
+    else:
+        return l_string
 
 
 def get_turnover_teams(turnover_string, home_players, away_players):
