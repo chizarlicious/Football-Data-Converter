@@ -20,11 +20,13 @@ def split_turnovers(col):
     final_list = []
     # Split on several different substring
     reg_list = (
-            "\)\.",       # ').'
-            " yards\.",   # ' yards.'
-            " yard\.",    # ' yard.'
-            " gain\.",    # ' gain.'
-            " safety\.",  # ' safety.'
+            "\)\.",           # ').'
+            " yards\.",       # ' yards.'
+            " yard\.",        # ' yard.'
+            " gain\.",        # ' gain.'
+            " safety\.",      # ' safety.'
+            " incomplete\.",  # ' incomplete.'
+            " snap\.",        # ' snap.'
             # Starting at 'intended for', match any word consisting of A
             # through Z (ignoring case) or a period until ' .'.
             # This is used for QB fumbles
