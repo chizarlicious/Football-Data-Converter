@@ -15,8 +15,6 @@ def split_turnovers(col):
     returns:
         A list of strings.
     """
-    # Either the turnover is alone, or is set off in its own sentence, so we
-    # split on '.'
     final_list = []
     # Split on several different substring
     reg_list = (
@@ -27,6 +25,7 @@ def split_turnovers(col):
             " safety\.",      # ' safety.'
             " incomplete\.",  # ' incomplete.'
             " snap\.",        # ' snap.'
+            "[0-9]\.",        # Number followed by period
             # Starting at 'intended for', match any word consisting of A
             # through Z (ignoring case) or a period until ' .'.
             # This is used for QB fumbles

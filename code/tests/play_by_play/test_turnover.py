@@ -30,7 +30,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             # QB Fumble
             "C. J. Browne pass incomplete short right intended for D. P. Lindley . C. J. Browne fumbles, recovered by C. J. Browne at SEA -14",
             # Muffed catch on kickoff
-            "Person1 kicks off 57 yards, muffed catch by Person2 , recovered by Person3 and returned for no gain",
+            "W. White kicks off 57 yards, muffed catch by S. White , recovered by J. Pinkman and returned for no gain",
+            # Fumble and Interception with the interception ending in a yard
+            # line
+            "J. McNulty pass incomplete intended for B. Russell is intercepted by D'Angelo Barksdale at LOC -24. J. McNulty fumbles, recovered by J. McNulty at LOC -20",
             # Not a turnover
             "Sisyphus up the middle for no gain."
         )
@@ -49,7 +52,11 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             ["R. P. Feynman fumbles, recovered by E. Fermi at LAL -20 (tackle by E. Lawrence)"],
             ["Men Without Hats fumbles, safety"],
             ["C. J. Browne fumbles, recovered by C. J. Browne at SEA -14"],
-            ["Person1 kicks off 57 yards, muffed catch by Person2 , recovered by Person3 and returned for no gain"],
+            ["W. White kicks off 57 yards, muffed catch by S. White , recovered by J. Pinkman and returned for no gain"],
+            [
+                "J. McNulty pass incomplete intended for B. Russell is intercepted by D'Angelo Barksdale at LOC -2",
+                "J. McNulty fumbles, recovered by J. McNulty at LOC -20",
+            ],
             []
         )
 
@@ -100,6 +107,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 split_turnovers(self.turnovers[10]),
                 self.turnover_splits[10]
                 )
+        self.assertEqual(
+                split_turnovers(self.turnovers[11]),
+                self.turnover_splits[11]
+                )
 
     def test_get_turnover_type(self):
         self.__set_turnover_consts()
@@ -148,6 +159,14 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 get_turnover_type(self.turnover_splits[9][0]),
                 "muffed catch"
                 )
+        self.assertEqual(
+                get_turnover_type(self.turnover_splits[10][0]),
+                "interception"
+                )
+        self.assertEqual(
+                get_turnover_type(self.turnover_splits[10][1]),
+                "fumble"
+                )
 
     def test_get_turnover_recoverer(self):
         self.__set_turnover_consts()
@@ -194,7 +213,15 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_recoverer(self.turnover_splits[9][0]),
-                "Person3"
+                "J. Pinkman"
+                )
+        self.assertEqual(
+                get_turnover_recoverer(self.turnover_splits[10][0]),
+                "D'Angelo Barksdale"
+                )
+        self.assertEqual(
+                get_turnover_recoverer(self.turnover_splits[10][1]),
+                "J. McNulty"
                 )
 
     def test_get_turnover_committer(self):
@@ -242,7 +269,15 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 )
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[9][0]),
-                "Person2"
+                "S. White"
+                )
+        self.assertEqual(
+                get_turnover_committer(self.turnover_splits[10][0]),
+                "J. McNulty"
+                )
+        self.assertEqual(
+                get_turnover_committer(self.turnover_splits[10][1]),
+                "J. McNulty"
                 )
 
     def test_get_turnover_teams(self):
@@ -331,10 +366,26 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.assertEqual(
                 get_turnover_teams(
                     self.turnover_splits[9][0],
-                    ("Person1", "Person3"),
-                    ("Person2",),
+                    ("W. White", "J. Pinkman"),
+                    ("S. White",),
                     ),
                 ("away", "home")
+                )
+        self.assertEqual(
+                get_turnover_teams(
+                    self.turnover_splits[10][0],
+                    ("J. McNulty", "B. Russell"),
+                    ("D'Angelo Barksdale",),
+                    ),
+                ("home", "away")
+                )
+        self.assertEqual(
+                get_turnover_teams(
+                    self.turnover_splits[10][1],
+                    ("J. McNulty", "B. Russell"),
+                    ("D'Angelo Barksdale",),
+                    ),
+                ("home", "home")
                 )
 
 
