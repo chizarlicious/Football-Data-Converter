@@ -29,7 +29,10 @@ def split_turnovers(col):
             # Starting at 'intended for', match any word consisting of A
             # through Z (ignoring case) or a period until ' .'.
             # This is used for QB fumbles
-            "intended for( [a-zA-Z.]+)* \."
+            "intended for( [a-zA-Z.]+)* \.",
+            # Starting at 'recovered by', match as above until ' .'.  This is
+            # used for onside kicks
+            "recovered by( [a-zA-Z.]+)* \."
             )
     regex = "|".join(reg_list)
     for item in re.split(regex, col):
