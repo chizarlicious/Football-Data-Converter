@@ -9,6 +9,7 @@ from raw_data_parsers.play_by_play.penalty import split_penalties, get_penalty_t
 from raw_data_parsers.play_by_play.play import get_play_type, get_scoring_type
 from raw_data_parsers.play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
 from raw_data_parsers.play_by_play.turnover import split_turnovers, get_turnover_type, get_turnover_recoverer, get_turnover_committer, get_turnover_teams
+from raw_data_parsers.play_by_play.sanitizer import remove_challenge
 
 
 class PlayByPlay:
@@ -87,7 +88,9 @@ class PlayByPlay:
                 # Extract the plain text description and store it, because it
                 # is used so often
                 description = cols[5].get_text(' ', strip=True).replace('\n', ' ')
-                self.current_play_info["description"] = description
+                # Sanitize replay challenges that they only the final result is used
+                sanitized_description = remove_challenge(description)
+                self.current_play_info["description"] = sanitized_description
 
                 # Assign offense
                 # We correct the 1999, 2013 kick offs when setting is_pchange
