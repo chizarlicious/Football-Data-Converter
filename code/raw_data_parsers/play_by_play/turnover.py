@@ -29,10 +29,10 @@ def split_turnovers(col):
             # Starting at 'intended for', match any word consisting of A
             # through Z (ignoring case) or a period until ' .'.
             # This is used for QB fumbles
-            "intended for( [a-zA-Z.]+)* \.",
+            "intended for( [a-zA-Z.\-']+)* \.",
             # Starting at 'recovered by', match as above until ' .'.  This is
             # used for onside kicks
-            "recovered by( [a-zA-Z.]+)* \."
+            "recovered by( [a-zA-Z.\-']+)* \."
             )
     regex = "|".join(reg_list)
     for item in re.split(regex, col):
@@ -92,6 +92,8 @@ def get_turnover_recoverer(turnover_string):
         r_split_string = "intercepted by"
         l_split_string = " at "
     elif to_type == "muffed catch":
+        if "recovered" not in turnover_string:
+            return False
         r_split_string = "recovered by"
         l_split_string = " and "
     else:  # Unknown case, we can't do anything
@@ -121,7 +123,7 @@ def get_turnover_committer(turnover_string):
     elif to_type == "interception":
         l_split_string = "pass incomplete"
     elif to_type == "muffed catch":
-        l_split_string = ", recovered by"
+        l_split_string = " , "
         r_split_string = "muffed catch by"
     else:  # Unknown case, we can't do anything
         return None

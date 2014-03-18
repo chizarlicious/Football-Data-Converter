@@ -36,6 +36,8 @@ class TestPlayByPlayTurnover(unittest.TestCase):
             "J. McNulty pass incomplete intended for B. Russell is intercepted by D'Angelo Barksdale at LOC -24. J. McNulty fumbles, recovered by J. McNulty at LOC -20",
             # Onside kick with fumble
             "Jean-Luc Picard kicks onside 13 yards, recovered by Lore . G. La Forge fumbles, recovered by Data at CHI-41",
+            # Muffed kicked
+            "Irène Joliot-Curie punts 33 yards, muffed catch by Frédéric Joliot-Curie , ball out of bounds at LOC -21",
             # Not a turnover
             "Sisyphus up the middle for no gain."
         )
@@ -60,6 +62,7 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 "J. McNulty fumbles, recovered by J. McNulty at LOC -20"
             ],
             ["G. La Forge fumbles, recovered by Data at CHI-41"],
+            ["Irène Joliot-Curie punts 33 yards, muffed catch by Frédéric Joliot-Curie , ball out of bounds at LOC -21"],
             []
         )
 
@@ -117,6 +120,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.assertEqual(
                 split_turnovers(self.turnovers[12]),
                 self.turnover_splits[12]
+                )
+        self.assertEqual(
+                split_turnovers(self.turnovers[13]),
+                self.turnover_splits[13]
                 )
 
     def test_get_turnover_type(self):
@@ -178,6 +185,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 get_turnover_type(self.turnover_splits[11][0]),
                 "fumble"
                 )
+        self.assertEqual(
+                get_turnover_type(self.turnover_splits[12][0]),
+                "muffed catch"
+                )
 
     def test_get_turnover_recoverer(self):
         self.__set_turnover_consts()
@@ -238,6 +249,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                 get_turnover_recoverer(self.turnover_splits[11][0]),
                 "Data"
                 )
+        self.assertEqual(
+                get_turnover_recoverer(self.turnover_splits[12][0]),
+                False
+                )
 
     def test_get_turnover_committer(self):
         self.__set_turnover_consts()
@@ -297,6 +312,10 @@ class TestPlayByPlayTurnover(unittest.TestCase):
         self.assertEqual(
                 get_turnover_committer(self.turnover_splits[11][0]),
                 "G. La Forge"
+                )
+        self.assertEqual(
+                get_turnover_committer(self.turnover_splits[12][0]),
+                "Frédéric Joliot-Curie"
                 )
 
     def test_get_turnover_teams(self):
@@ -413,6 +432,14 @@ class TestPlayByPlayTurnover(unittest.TestCase):
                     ("Lore",),
                     ),
                 ("home", "home")
+                )
+        self.assertEqual(
+                get_turnover_teams(
+                    self.turnover_splits[12][0],
+                    ("Irène Joliot-Curie",),
+                    ("Frédéric Joliot-Curie",),
+                    ),
+                ("away", False)
                 )
 
 
