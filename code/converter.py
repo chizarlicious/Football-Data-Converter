@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import json
+from subprocess import check_output, CalledProcessError
+from os.path import dirname, realpath
+from os import getcwd, chdir, devnull
 from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
 
@@ -47,6 +50,9 @@ class Converter:
         for key, value in self.strainers.items():
             self.soups[key] = BeautifulSoup(cont, parse_only=value)
 
+        # Save the version of the parser code used to create the data file
+        self.__set_version()
+
         # Parse the various tables
         self.__parse_title()
         self.__parse_officials()
@@ -75,16 +81,14 @@ class Converter:
                 "team stats": {},
                 "plays": []
                 }
-        self.json["venue"] = {
-                }
-        self.json["datetime"] = {
-                }
-        self.json["betting"] = {
-                }
+        self.json["venue"] = {}
+        self.json["datetime"] = {}
+        self.json["betting"] = {}
         self.json["players"] = {
                 "home": {},
                 "away": {}
                 }
+        self.json["_version"] = {}
         teamstats = {
                 "rush": {},
                 "pass": {},
@@ -110,6 +114,58 @@ class Converter:
         self.strainers["off_stats"] = SoupStrainer("table", id="skill_stats")
         self.strainers["kick_stats"] = SoupStrainer("table", id="kick_stats")
         self.strainers["all_tables"] = SoupStrainer("table")
+
+    def __set_version(self):
+        """ Sets the valuse of the  _version tag with the hashes from the
+        various git repos. """
+        self.json["_version"]["parser"] = self.__get_parser_version()
+        self.json["_version"]["raw"] = self.__get_raw_data_version()
+
+    def __get_raw_data_version(self):
+        """ Returns a string indicating the latest git commit from the raw
+        data's git repository. """
+        # Try to get the raw data version
+        raw_dir = dirname(realpath(self.file_name))
+        current_dir = getcwd()
+
+        # Try to change dir
+        try:
+            chdir(raw_dir)
+        except OSError:
+            raw_version = "unknown"
+        else:
+            # Now that we're in the raw directory, look for git
+            try:
+                with open(devnull, "w") as fnull:
+                    raw_version = check_output(['git', 'rev-parse', 'HEAD'], stderr=fnull)
+            except CalledProcessError:
+                raw_version = "unknown"
+            else:
+                # Having succeeded, we now clean up the output and save it
+                raw_version = raw_version.decode("utf-8").strip()
+            finally:
+                # Always change back to the starting dir!
+                chdir(current_dir)
+
+        return raw_version
+
+    def __get_parser_version(self):
+        """ Returns a string indicating the latest git commit from the parser's
+        git repository. """
+        # Try to get the parser version
+        try:
+            with open(devnull, "w") as fnull:
+                parser_version = check_output(
+                        ['git', 'rev-parse', 'HEAD'],
+                        stderr=fnull
+                        )
+        except CalledProcessError:
+            parser_version = "unknown"
+        else:
+            # Having succeeded, we now clean up the output and save it
+            parser_version = parser_version.decode("utf-8").strip()
+
+        return parser_version
 
     def __parse_title(self):
         """ Parse the title tag from the HTML. This sets the two teams and the
@@ -358,10 +414,10 @@ if __name__ == '__main__':
             continue
         else:
             out_file_name = "../data/reco/{season}/{season}_{date}_{away}_at_{home}.json".format(
-                    season = converter.season,
-                    date = converter.output_date,
-                    away = converter.away_team,
-                    home = converter.home_team
+                    season=converter.season,
+                    date=converter.output_date,
+                    away=converter.away_team,
+                    home=converter.home_team
                 )
             with open(out_file_name, "w") as out_file:
                 #json.dumps(converter.json, out_file, sort_keys=True, indent=2, separators=(',', ': '), ensure_ascii=False)
