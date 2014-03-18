@@ -103,8 +103,6 @@ class PlayByPlay:
                         self.current_play_info["offense"] = "home"
                 else:
                     self.current_play_info["offense"] = self.last_play_info["offense"]
-                if self.is_penalty:
-                    pbp_dict["penalty"] = self.__set_penalty()
 
                 # Set current score
                 pbp_dict["score"] = self.__set_score(cols)
@@ -125,6 +123,10 @@ class PlayByPlay:
                         self.current_play_info["offense"] = "away"
                     else:
                         self.current_play_info["offense"] = "home"
+
+                # Set penalty
+                if self.is_penalty:
+                    pbp_dict["penalty"] = self.__set_penalty()
 
                 # Parse state
                 pbp_dict["number"] = int(cols[5].a["name"].split('_')[1]) - 1
@@ -327,10 +329,15 @@ class PlayByPlay:
                     self.home,
                     self.away
                     )
-            # Set the team
+            # Set the team. On kick offs the NFL defines the offense as the
+            # kicking team, but we define it as the defense
+            if self.current_play_info["type"] in {"kick off", "onside kick"}:
+                off_team = self.__flip(self.current_play_info["offense"])
+            else:
+                off_team = self.current_play_info["offense"]
             p["team"] = get_penalty_team(
                     pen_string,
-                    self.current_play_info["offense"],
+                    off_team,
                     self.home,
                     self.away,
                     self.home_players,
@@ -351,6 +358,15 @@ class PlayByPlay:
         penalties["no play"] = no_play
 
         return penalties
+
+    def __flip(self, team):
+        """ Flip home to away, and vice versa. """
+        if team == "home":
+            return "away"
+        elif team == "away":
+            return "home"
+        else:
+            return None
 
     def __repr__(self):
         """ Method that returns a representation of the contents. """
