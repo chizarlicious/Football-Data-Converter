@@ -332,15 +332,10 @@ class PlayByPlay:
                     self.home,
                     self.away
                     )
-            # Set the team. On kick offs the NFL defines the offense as the
-            # kicking team, but we define it as the defense
-            if self.current_play_info["type"] in {"kick off", "onside kick"}:
-                off_team = self.__flip(self.current_play_info["offense"])
-            else:
-                off_team = self.current_play_info["offense"]
+            # Set the team
             p["team"] = get_penalty_team(
                     pen_string,
-                    off_team,
+                    self.current_play_info["offense"],
                     self.home,
                     self.away,
                     self.home_players,
