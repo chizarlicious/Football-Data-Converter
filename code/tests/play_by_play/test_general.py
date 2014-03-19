@@ -30,6 +30,7 @@ class TestPlayByPlay(unittest.TestCase):
         self.assertEqual(get_kicking_team("DEN 35"), "DEN")
         self.assertEqual(get_kicking_team("DEN 50"), "DEN")
         self.assertEqual(get_kicking_team("DEN"), "DEN")
+        self.assertEqual(get_kicking_team(""), None)
         # Failure
         self.assertRaises(KeyError, get_kicking_team, "PTC 35")
 

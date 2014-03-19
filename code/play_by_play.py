@@ -121,8 +121,11 @@ class PlayByPlay:
                     kick_team = get_kicking_team(kick_text)
                     if kick_team == self.home:
                         self.current_play_info["offense"] = "away"
-                    else:
+                    elif kick_team == self.away:
                         self.current_play_info["offense"] = "home"
+                    else:  # Assume the last team with the ball is kicking
+                        flipped_team = self.__flip(self.last_play_info["offense"])
+                        self.current_play_info["offense"] = flipped_team
 
                 # Set penalty
                 if self.is_penalty:

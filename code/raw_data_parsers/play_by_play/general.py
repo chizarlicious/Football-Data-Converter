@@ -46,10 +46,13 @@ def get_kicking_team(kick_text):
         kick_text: A string giving the field position.
 
     returns:
-        A string of the kicking team's code.
+        A string of the kicking team's code, None if the string is empty.
 
     raises:
         KeyError if the team codes don't exist.
     """
     split_cols = kick_text.split()
-    return pfr_codes_to_code[split_cols[0]]
+    if split_cols:
+        return pfr_codes_to_code[split_cols[0]]
+    else:
+        return None
