@@ -398,20 +398,75 @@ class Converter:
         return self.json.__str__()
 
 
+def json_unchanged(file_name, json_obj):
+    """Takes a filename and a object that will be serialized into a json and
+    tests their equality after stripping the _version hashes.
+
+    args:
+        file_name: A string containing the file to check
+        json_obj: An object that will be serialized into a json
+
+    returns:
+        True if the json loaded from the file is the same as the one given to
+            the function, after stripping the _version key and value. False
+            otherwise.
+    """
+    # Try to open the target file, return false if it can't be opened for
+    # reading, otherwise we continue trying to compare it
+    try:
+        with open(out_file_name, "r") as old_file:
+            old_json = json.load(old_file)
+    except IOError:
+        return False
+    else:
+        # Deep copy to avoid mangling the input json
+        new_json = deepcopy(json_obj)
+
+        # Remove the _version key; if that is all that has changed,
+        # we don't care and won't write the file
+        try:
+            del old_json["_version"]
+        except KeyError:
+            pass  # That's ok, we want to remove it anyway...
+        try:
+            del new_json["_version"]
+        except KeyError:
+            pass
+
+        # If they are the same, don't write
+        return old_json == new_json
+
+
 if __name__ == '__main__':
     # We only need to parse commandline flags if running as the main script
     import argparse
 
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument('file', type=str, nargs="+",
-            help="a raw data file to convert to JSON")
+    argparser = argparse.ArgumentParser(
+            description="Convert an html file to a JSON file."
+            )
+    # The list of input files
+    argparser.add_argument(
+            'file',
+            type=str,
+            nargs="+",
+            help="a raw data file (or files) to convert to JSON"
+            )
+    argparser.add_argument(
+            "--force-overwrite",
+            help="overwrite files and update the '_version' hashes, even if nothing else has changed",
+            action="store_true"
+            )
+
     args = argparser.parse_args()
 
     for raw_file in args.file:
+        # Try to convert the file
         try:
             converter = Converter(raw_file)
+        # Continue if we fail
         except:
             continue
+        # If we succeed, write it
         else:
             out_file_name = "../data/reco/{season}/{season}_{date}_{away}_at_{home}.json".format(
                     season=converter.season,
@@ -419,9 +474,14 @@ if __name__ == '__main__':
                     away=converter.away_team,
                     home=converter.home_team
                 )
+            # If force_overwrite is not set, we test to make sure the file has
+            # changed before writing. We do this so that it is easier to find
+            # meaningful changes in git (otherwise every file changes every
+            # time we make a new parser commit, even if the data is unchanged).
+            if not args.force_overwrite:
+                if json_unchanged(out_file_name, converter.json):
+                    continue
+
+            # Write our file
             with open(out_file_name, "w") as out_file:
-                #json.dumps(converter.json, out_file, sort_keys=True, indent=2, separators=(',', ': '), ensure_ascii=False)
-                data = json.dumps(converter.json, sort_keys=True, indent=2, separators=(',', ': '))
-                out_file.write(data)
-                out_file.close()
-            #print(json.dumps(converter.json, sort_keys=True, indent=2, separators=(',', ': ')))
+                json.dump(converter.json, out_file, sort_keys=True, indent=2, separators=(',', ': '), ensure_ascii=False)
