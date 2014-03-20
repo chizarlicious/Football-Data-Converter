@@ -36,7 +36,8 @@ class PlayByPlay:
                 "home score": 0,
                 "away score": 0,
                 "description": '',
-                "type": None
+                "type": None,
+                "number": -1
                 }
         self.current_play_info = {
                 "time": 0,
@@ -45,7 +46,8 @@ class PlayByPlay:
                 "home score": 0,
                 "away score": 0,
                 "description": '',
-                "type": None
+                "type": None,
+                "number": -1
                 }
         self.is_pchange = False
         self.is_scoring = False
@@ -84,6 +86,10 @@ class PlayByPlay:
             cols = row.find_all("td")
             if cols:  # This if removes the header
                 pbp_dict = {}
+                # Set the number of the play first, so that if a play fails to
+                # parse, we have a gap in the numbering to help us detect it
+                self.current_play_info["number"] = self.last_play_info["number"] + 1
+                pbp_dict["number"] = self.current_play_info["number"]
 
                 # Extract the plain text description and store it, because it
                 # is used so often
@@ -132,7 +138,6 @@ class PlayByPlay:
                     pbp_dict["penalty"] = self.__set_penalty()
 
                 # Parse state
-                pbp_dict["number"] = int(cols[5].a["name"].split('_')[1]) - 1
                 pbp_dict["state"] = self.__set_state(cols)
                 turnovers = self.__set_turnover()
                 if turnovers:
