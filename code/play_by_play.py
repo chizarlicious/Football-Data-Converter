@@ -4,7 +4,7 @@ import json
 from copy import deepcopy
 from bs4 import BeautifulSoup, SoupStrainer
 
-from raw_data_parsers.play_by_play.general import row_type, get_kicking_team
+from raw_data_parsers.play_by_play.general import row_type, get_kicking_offense
 from raw_data_parsers.play_by_play.penalty import split_penalties, get_penalty_team, get_penalty_player, get_penalty_yards, get_penalty_type, get_penalty_name
 from raw_data_parsers.play_by_play.play import get_play_type, get_scoring_type
 from raw_data_parsers.play_by_play.state import convert_int, convert_quarter, convert_game_clock, convert_field_position
@@ -124,11 +124,16 @@ class PlayByPlay:
                 # On a kickoff, we make sure we have the team right
                 if pbp_dict["play"]["type"] in {"kick off", "onside kick"}:
                     kick_text = cols[4].get_text(' ', strip=True).replace('\n', ' ')
-                    kick_team = get_kicking_team(kick_text)
-                    if kick_team == self.home:
-                        self.current_play_info["offense"] = "away"
-                    elif kick_team == self.away:
-                        self.current_play_info["offense"] = "home"
+                    kick_team = get_kicking_offense(
+                            kick_text,
+                            self.current_play_info["description"],
+                            self.home,
+                            self.away,
+                            self.home_players,
+                            self.away_players
+                            )
+                    if kick_team in ["home", "away"]:
+                        self.current_play_info["offense"] = kick_team
                     else:  # Assume the last team with the ball is kicking
                         flipped_team = self.__flip(self.last_play_info["offense"])
                         self.current_play_info["offense"] = flipped_team

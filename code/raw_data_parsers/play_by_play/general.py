@@ -39,20 +39,59 @@ def row_type(row):
         return 0
 
 
-def get_kicking_team(kick_text):
-    """Takes a field position and returns the kicking team on kickoff.
+def get_kicking_offense(
+        kick_text,
+        play_text,
+        home_team,
+        away_team,
+        home_players,
+        away_players
+        ):
+    """Takes a field position, a string describing the play, the teams, and the
+    plays, and returns the offense on a kickoff.
 
     args:
         kick_text: A string giving the field position.
+        play_text: A string giving a description of the play.
+        home_team, away_team: The team code for the home and away team,
+            respectively.
+        home_players, away_players: Iterables that support 'in' containing a
+            list of all players on the home and away team, respectively.
 
     returns:
-        A string of the kicking team's code, None if the string is empty.
+        A string of "home" or "away", or None.
 
     raises:
         KeyError if the team codes don't exist.
     """
     split_cols = kick_text.split()
+    # It is easiest to get the kicking team from the field position, but
+    # sometimes this isn't provided (often because of a penalty on the
+    # kickoff).
     if split_cols:
-        return pfr_codes_to_code[split_cols[0]]
+        code = pfr_codes_to_code[split_cols[0]]
+        # Remember, if the "home" team is kicking, the "away" team is on
+        # offense
+        if code == home_team:
+            return "away"
+        elif code == away_team:
+            return "home"
+        else:
+            print("UNKNOWN KICKING TEAM", code, away_team, "at", home_team)
+            return None
+    # We now fall back to using the description of the play and looking at the
+    # kicker
     else:
-        return None
+        kicker = play_text.split("kicks")[0].strip()
+        is_home = (kicker in home_players)
+        is_away = (kicker in away_players)
+        if is_home and not is_away:
+            return "away"
+        elif is_away and not is_home:
+            return "home"
+        elif is_home and is_away:
+            print("\tDEGENERATE KICKER!", kicker, away_team, 'at', home_team)
+            return None
+        else:
+            print("\tUNKNOWN KICKER!", kicker, away_team, 'at', home_team)
+            return None
