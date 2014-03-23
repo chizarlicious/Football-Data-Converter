@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from raw_data_parsers.parse_game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
+from raw_data_parsers.game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
 
 
 class TestGameInfo(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestGameInfo(unittest.TestCase):
         # Successful
         self.assertEqual(
                 convert_weather("13 degrees, relative humidity 62%, wind 8 mph"),
-                {"temperature": 13, "relative humidity": 0.62, "wind speed": 8, "wind chill": None}
+                {"temperature": 13, "relative humidity": 0.62, "wind speed": 8}
                 )
         self.assertEqual(
                 convert_weather("35 degrees, relative humidity 59%, wind 10 mph, wind chill 27"),
@@ -37,14 +37,14 @@ class TestGameInfo(unittest.TestCase):
                 )
         self.assertEqual(
                 convert_weather("72 degrees, no wind"),
-                {"temperature": 72, "relative humidity": None, "wind speed": 0, "wind chill": None}
+                {"temperature": 72, "wind speed": 0}
                 )
         self.assertEqual(
                 convert_weather("28 degrees, wind 1 mph"),
-                {"temperature": 28, "relative humidity": None, "wind speed": 1, "wind chill": None}
+                {"temperature": 28, "wind speed": 1}
                 )
         # Failure returns dictionary full of None, or a ValueError
-        self.assertEqual(convert_weather("I have no idea what degree to get!"), None)
+        self.assertEqual(convert_weather("I have no idea what degree to get!"), {})
         self.assertRaises(ValueError, convert_weather, "twenty-eight degrees, wind five mph")
 
     def test_convert_overunder(self):

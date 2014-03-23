@@ -8,6 +8,28 @@ team_codes = frozenset(
             "STL", "TB", "TEN", "WAS"]
         )
 
+pfr_codes = frozenset(
+        ["CRD", "ATL", "RAV", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN",
+            "DET", "GNB", "HTX", "CLT", "JAX", "KAN", "MIA", "MIN", "NWE",
+            "NOR", "NYG", "NYJ", "RAI", "PHI", "PIT", "SDG", "SFO", "SEA",
+            "RAM", "TAM", "OTI", "WAS"]
+        )
+
+team_names = frozenset(
+        ["AFC Probowl Team", "Arizona Cardinals", "Atlanta Falcons",
+            "Baltimore Ravens", "Buffalo Bills", "Carolina Panthers",
+            "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns",
+            "Dallas Cowboys", "Denver Broncos", "Detroit Lions",
+            "Green Bay Packers", "Houston Texans", "Indianapolis Colts",
+            "Jacksonville Jaguars", "Kansas City Chiefs", "Miami Dolphins",
+            "Minnesota Vikings", "New England Patriots", "New Orleans Saints",
+            "NFC Probowl Team", "New York Giants", "New York Jets",
+            "Oakland Raiders", "Philadelphia Eagles", "Pittsburgh Steelers",
+            "San Diego Chargers", "Seattle Seahawks", "San Francisco 49ers",
+            "Saint Louis Rams", "St. Louis Rams", "Tampa Bay Buccaneers",
+            "Tennessee Titans", "Washington Redskins"]
+        )
+
 codes_to_name = {
         "AFC": "AFC Probowl Team",
         "ARI": "Arizona Cardinals",
@@ -84,36 +106,36 @@ names_to_code = {
         }
 
 pfr_codes_to_code = {
-        "CRD": "ARI",
         "ATL": "ATL",
-        "RAV": "BAL",
         "BUF": "BUF",
         "CAR": "CAR",
         "CHI": "CHI",
         "CIN": "CIN",
         "CLE": "CLE",
+        "CLT": "IND",
+        "CRD": "ARI",
         "DAL": "DAL",
         "DEN": "DEN",
         "DET": "DET",
         "GNB": "GB",
         "HTX": "HOU",
-        "CLT": "IND",
         "JAX": "JAC",
         "KAN": "KC",
         "MIA": "MIA",
         "MIN": "MIN",
-        "NWE": "NE",
         "NOR": "NO",
+        "NWE": "NE",
         "NYG": "NYG",
         "NYJ": "NYJ",
-        "RAI": "OAK",
+        "OTI": "TEN",
         "PHI": "PHI",
         "PIT": "PIT",
-        "SDG": "SD",
-        "SFO": "SEA",
-        "SEA": "SF",
+        "RAI": "OAK",
         "RAM": "STL",
+        "RAV": "BAL",
+        "SDG": "SD",
+        "SEA": "SEA",
+        "SFO": "SF",
         "TAM": "TB",
-        "OTI": "TEN",
         "WAS": "WAS",
         }
