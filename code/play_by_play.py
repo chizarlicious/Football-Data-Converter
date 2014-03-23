@@ -165,15 +165,32 @@ class PlayByPlay:
         self.is_scoring = ("is_scoring" in row_class)
         self.is_penalty = ("has_penalty" in row_class)
         # In some years the raw data considers the kicking team as the offense;
-        # we correct for that here.
+        # we correct for that here. These years also correctly use the
+        # "pos_change" flag to signal onside kicks, so no special handling is
+        # needed.
         if self.season in self.kick_offense_years \
         and self.last_play_info["type"] in {"kick off", "onside kick"}:
             # The 'not' is required because if a kick off results in a turn
             # over, the "pos_change" flag isn't set, as the kicking team still
             # has the ball (and was considered the offense).
             self.is_pchange = not ("pos_change" in row_class)
-        else:
+        # Other years follow our definition of offense, although they fail to
+        # do so correctly for onside kicks
+        elif self.last_play_info["type"] != "onside kick":
             self.is_pchange = ("pos_change" in row_class)
+        # Onside kick in 2000–2012
+        else:
+            # These years handle onside kicks poorly; they NEVER set
+            # "pos_change" when an onside happens. They use "onside kick
+            # successful" to indicate that the kicking team recovered,
+            # otherwise they give no indication. Therefore we set the correct
+            # flag by hand; True if the kicking team recovered (because the
+            # offense is the receiving team), False otherwise.
+            last_desc = self.last_play_info["description"]
+            if "onside kick successful" in last_desc:
+                self.is_pchange = True
+            else:
+                self.is_pchange = False
 
     def __set_state(self, cols):
         """ Takes a list of columns from an HTML table and sets the "state"
