@@ -506,7 +506,7 @@ if __name__ == '__main__':
                     args.do_not_sort
                     )
             try:
-                makedirs(output_dir)
+                makedirs(output_dir, exist_ok=True)
             except OSError:
                 err_string = "Failed to make directory '" + output_dir
                 err_string += "'. Skipping file '" + raw_file + "'."
