@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 import json
-from subprocess import check_output, CalledProcessError
-from os.path import dirname, realpath
-from os import getcwd, chdir, devnull
 from bs4 import BeautifulSoup, SoupStrainer
 from copy import deepcopy
+from os import getcwd, chdir, devnull, makedirs
+from os.path import dirname, realpath, normpath
+from subprocess import check_output, CalledProcessError
 
 from raw_data_parsers.game_info import convert_time, convert_weather, convert_duration, convert_overunder, convert_vegas_line, convert_stadium
-from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season, get_output_date
 from raw_data_parsers.team_stats import convert_rush_info, convert_pass_info, convert_sack_info, convert_fumble_info, convert_penalty_info
+from raw_data_parsers.title_info import convert_title_teams, convert_title_date, get_season, get_output_date
 
-from data_helpers.team_list import names_to_code, team_names
 from data_helpers.rosters import rosters
+from data_helpers.team_list import names_to_code, team_names
 
 from play_by_play import PlayByPlay
 
@@ -437,8 +437,28 @@ def json_unchanged(file_name, json_obj):
         return old_json == new_json
 
 
+def get_output_dir(spec_dir, season, do_not_sort=False):
+    """ Returns the output directory for the file.
+
+    args:
+        spec_dir: User specified directory
+        season: The season the game took place in
+        do_not_sort: If true, do not make subdirectories for each season
+
+    returns:
+        A normalized directory location to save the file to. No checking is
+            done to see if the directory is legal or exists.
+    """
+    if not do_not_sort:
+        return normpath("{directory}/{season}/".format(
+            directory=spec_dir, season=season
+            ))
+    else:
+        return normpath("{directory}/".format(directory=spec_dir))
+
+
 if __name__ == '__main__':
-    # We only need to parse commandline flags if running as the main script
+    # We only need to parse command line flags if running as the main script
     import argparse
 
     argparser = argparse.ArgumentParser(
@@ -446,10 +466,21 @@ if __name__ == '__main__':
             )
     # The list of input files
     argparser.add_argument(
-            'file',
+            "file",
             type=str,
             nargs="+",
             help="a raw data file (or files) to convert to JSON"
+            )
+    argparser.add_argument(
+            "-o",
+            "--output-directory",
+            help="directory to save files to",
+            default="../../data/reco/"
+            )
+    argparser.add_argument(
+            "--do-not-sort",
+            help="do not sort files into subdirectories by season",
+            action="store_true"
             )
     argparser.add_argument(
             "--force-overwrite",
@@ -468,12 +499,28 @@ if __name__ == '__main__':
             continue
         # If we succeed, write it
         else:
-            out_file_name = "../data/reco/{season}/{season}_{date}_{away}_at_{home}.json".format(
+            # Get the output directory, and try to make it
+            output_dir = get_output_dir(
+                    args.output_directory,
+                    converter.season,
+                    args.do_not_sort
+                    )
+            try:
+                makedirs(output_dir)
+            except OSError:
+                err_string = "Failed to make directory '" + output_dir
+                err_string += "'. Skipping file '" + raw_file + "'."
+                print(err_string)
+                continue
+            # Now make the full file name
+            tmp_out_file_name = "{output_dir}/{season}_{date}_{away}_at_{home}.json".format(
+                    output_dir=output_dir,
                     season=converter.season,
                     date=converter.output_date,
                     away=converter.away_team,
                     home=converter.home_team
                 )
+            out_file_name = normpath(tmp_out_file_name)
             # If force_overwrite is not set, we test to make sure the file has
             # changed before writing. We do this so that it is easier to find
             # meaningful changes in git (otherwise every file changes every
@@ -481,7 +528,11 @@ if __name__ == '__main__':
             if not args.force_overwrite:
                 if json_unchanged(out_file_name, converter.json):
                     continue
-
             # Write our file
             with open(out_file_name, "w") as out_file:
-                json.dump(converter.json, out_file, sort_keys=True, indent=2, separators=(',', ': '), ensure_ascii=False)
+                try:
+                    json.dump(converter.json, out_file, sort_keys=True, indent=2, separators=(',', ': '), ensure_ascii=False)
+                except IOError:
+                    err_string = "Failed to write '" + out_file_name + "'."
+                    print(err_string)
+                    continue
