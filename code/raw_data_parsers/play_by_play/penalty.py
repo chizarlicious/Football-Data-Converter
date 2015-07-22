@@ -90,9 +90,9 @@ def get_penalty_team(
     # But the infractor could also be a pfr_code, so we try that
     elif infractor in pfr_codes:
         team_code = pfr_codes_to_code[infractor]
-        if infractor == home_team:
+        if team_code == home_team:
             return "home"
-        elif infractor == away_team:
+        elif team_code == away_team:
             return "away"
     # We've failed to locate the player or team, another method will have to be
     # used
@@ -118,7 +118,10 @@ def get_penalty_player(penalty_string, home_team, away_team):
         The name, or "team" if it is a team penalty.
     """
     infractor = penalty_string.split("Penalty on")[1].split(":")[0].strip()
+
     if infractor == home_team or infractor == away_team:
+        return "team"
+    elif infractor in pfr_codes:
         return "team"
     else:
         return infractor
